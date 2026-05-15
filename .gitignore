@@ -1,0 +1,9 @@
+node_modules/
+.litmus/
+*.log
+.env
+.env.local
+.DS_Store
+dist/
+build/
+.vercel
