@@ -44,6 +44,15 @@ When creating or modifying skills inside `.claude/skills/`, use the `skill-creat
 
 The Litmus deliverable itself (`.claude/skills/litmus/`) MUST be authored through `skill-creator` when work on M2 begins.
 
+### Project Skills in this Repo
+
+| Skill | Path | Purpose |
+|-------|------|---------|
+| `sdlc:issue` | `.claude/skills/issue/` | Create GitHub issues from briefs against the repo's templates |
+| `sdlc:create-pr` | `.claude/skills/create-pr/` | Create pull requests filled from git context and linked issue |
+| `litmus-spike` | `.claude/skills/litmus-spike/` | Minimal 4-stage Litmus pipeline for Spike #2 validation |
+| `litmus` | `.claude/skills/litmus/` (TBD) | Production Litmus skill — authored during M2 |
+
 ## Architecture
 
 See [`architecture.md`](architecture.md) for the skill's structural shape, prompt layout, and pipeline stages.
