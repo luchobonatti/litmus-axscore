@@ -59,6 +59,16 @@ Primary persona for MVP validation: **the consultant**. The MVP must be usable b
 - Web UI, standalone CLI, hosted SaaS (out of long-term scope).
 - Distribution via marketplaces (initial: GitHub-only).
 
+## Scope: non-interactive tasks only
+
+Litmus measures **library-level claims that an AI agent can execute without human interaction**. Interactive CLI wizards (`pnpm dlx <wizard>`, `vue create`, `next create-next-app`, `prisma init`, `vite create`, and similar) are explicitly out of scope.
+
+When a doc's primary install or setup flow is interactive, Litmus does NOT try to script it (no `expect`, no stdin injection, no `--yes` flag detection). Instead, Litmus generates tasks that test the *underlying library claims* — package existence, exported symbols, type shapes, function returns — and reports the interactive flow as a known limitation of the doc's agent-friendliness.
+
+**Implication for doc maintainers:** if Litmus generates few or no executable tasks for a doc, the doc's flow is too dependent on interactive CLI steps. To improve the Execution Score, expose non-interactive equivalents: `--yes` flags, scriptable bootstraps, programmatic factory functions, or library-level entry points that bypass the wizard.
+
+This decision is intentional. Litmus measures what AI agents can do in a single autonomous run. Anything requiring "click here in the wizard" is by definition outside the agent's reach in the current generation of tooling.
+
 ## Success Criteria (MVP)
 
 - Installable and runnable in **under 2 minutes** from cold start by someone who has Claude Code already configured.
