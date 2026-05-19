@@ -58,10 +58,10 @@ Do NOT run when: the URL is missing/invalid, or clearly not a docs site.
    4. **Cap and select.** If the candidate set from steps 1-3 exceeds 50, apply this deterministic selection:
       1. Categorize each URL using the path patterns in `prompts/task-generation.md` (quickstart, recipe, reference, advanced, other).
       2. Take up to 12 per category in source order, iterating categories in this priority: quickstart → recipe → reference → advanced → other.
-      3. If still under 50 after categorical sampling, fill the remainder from the largest underused category, preserving source order.
+      3. If still under 50 after categorical sampling, fill the remainder from the largest underused category, preserving source order. Tie-breaker when two or more categories share the same remaining count: pick by the priority order above (quickstart → recipe → reference → advanced → other).
       4. Stop at 50 total. Record the kept and dropped counts in `manifest.json` under `selection: {candidates_total, kept, dropped, per_category}`.
    5. For each candidate page (up to 50):
-      1. **Try native markdown first.** Fetch `<page-url>.md` (append `.md` to the page URL). If 200 with `Content-Type: text/markdown` (or `text/plain` when the path already ends in `.md`), use the response body directly. Set `conversion_method: 'native-markdown'` in `manifest.json`.
+      1. **Try native markdown first.** If the candidate URL already ends in `.md`, fetch it as-is. Otherwise fetch `<page-url>.md`. In either case, if the response is 200 with `Content-Type` matching `text/markdown` or `text/plain`, use the body directly and set `conversion_method: 'native-markdown'` in `manifest.json`.
       2. **Else fetch the HTML version** and convert via the deterministic local tool (turndown or pandoc per Hard Rules). Set `conversion_method` to the tool used (`turndown`, `pandoc`, etc.).
       3. Strip nav/footer/scripts when converting from HTML.
       4. Write `ingested/content/<slug>.md` and append to `ingested/pages.json` with `[{url, slug, title, headings, char_count, category}]`. Category labels follow `prompts/task-generation.md`.
