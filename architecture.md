@@ -61,7 +61,7 @@ The Litmus skill drives Claude Code through five stages. Each stage produces a s
 | 4 | Evaluation | LLM (via `prompts/evaluation.md`) | `evaluations.json` |
 | 5 | Reporting | Helper script (`render-report.ts`) | `litmus-report.md` + inline scorecard |
 
-Readability Score (AFDocs) is **out of MVP**. It joins as Stage 0 in v1.1 (see [roadmap M5](docs/discovery/roadmap.md)).
+Readability Score (AFDocs) is **out of MVP**. It joins as a pre-ingest step in v1.1 (see [roadmap M5](docs/discovery/roadmap.md)).
 
 ## Key Abstractions
 
