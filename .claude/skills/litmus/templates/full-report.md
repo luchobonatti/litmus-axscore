@@ -1,6 +1,6 @@
 # Full Report Template
 
-> Rendered to `<cwd>/litmus-report-<TS>.md` at the end of a Litmus run. Each run gets its own file — prior runs are never overwritten. A summary row is appended to `.litmus/reports-index.md` by Stage 5; see `reports-index.md` template for that format. Suitable for both human reading and machine processing.
+> Rendered to `<cwd>/litmus-report-<TS>.md` at the end of a Litmus run. Each run gets its own file — prior runs are never overwritten. A summary row is appended to `.litmus/reports-index.md` by the report step; see `reports-index.md` template for that format.
 >
 > Placeholders use `{{double_braces}}`. The agent substitutes from `manifest.json`, `tasks.json`, and `evaluations.json`.
 
@@ -110,17 +110,17 @@ Litmus evaluates documentation by generating executable tasks that test what the
 - **Tasks per run:** {{task_count}}, diversified across pages and difficulty (target ~3 basic / ~4 intermediate / ~3 advanced).
 - **Failure taxonomy:** `broken_example`, `missing_context`, `ambiguous_terminology`, `undocumented_gotcha`, `missing_decision_tree`, plus `other` as a last resort.
 - **HTML→markdown conversion:** `{{conversion_method}}`.
-- **Pages ingested:** {{ingested_pages_count}} (Stage 1).
+- **Pages ingested:** {{ingested_pages_count}}.
 
 ## Artifacts
 
 All structured outputs for this run are under `{{cwd}}/.litmus/run-{{ts}}/`:
 
 - `manifest.json` — run metadata
-- `ingested/pages.json` and `ingested/content/*.md` — Stage 1 outputs
-- `tasks.json` — Stage 2 outputs
-- `executions/task-NNN/` — Stage 3 outputs per task (solution.ts, package.json, result.json, logs)
-- `evaluations.json` — Stage 4 outputs
+- `ingested/pages.json` and `ingested/content/*.md` — ingested pages and per-page content
+- `tasks.json` — generated tasks
+- `executions/task-NNN/` — per-task execution artifacts (solution.ts, package.json, result.json, logs)
+- `evaluations.json` — per-task evaluations
 
 ---
 

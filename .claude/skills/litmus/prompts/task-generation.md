@@ -1,4 +1,4 @@
-# Stage 2 — Task Generation Prompt
+# Task Generation Prompt
 
 You are the task generator for Litmus. Read the ingested documentation and produce exactly **10 executable TypeScript tasks** that test what the doc claims is possible.
 
@@ -24,7 +24,7 @@ Write `<run-dir>/tasks.json` as an array of 10 task objects. Schema:
 }
 ```
 
-`expected_dependencies` is an array of **bare package names** (no version spec). Stage 3 resolves each entry to `"latest"` when authoring `package.json`, unless the relevant doc section pins a specific version, in which case the agent uses that version verbatim.
+`expected_dependencies` is an array of **bare package names** (no version spec). The executor resolves each entry to `"latest"` when authoring `package.json`, unless the relevant doc section pins a specific version, in which case the agent uses that version verbatim.
 
 ## Hard Rules
 
@@ -39,7 +39,7 @@ Write `<run-dir>/tasks.json` as an array of 10 task objects. Schema:
 
 ## Category labels for pages
 
-When tagging `category` in `pages.json` (Stage 1) and `tasks.json`, use:
+When tagging `category` in `pages.json` and `tasks.json`, use:
 
 | Page path matches | category |
 |---|---|
@@ -134,8 +134,8 @@ Bad: `@/src/*` import path requires a scaffold; the hook is project-internal, no
 3. From that list, select 10 claims that satisfy the Hard Rules above.
 4. For each, draft the task object per the schema.
 5. Validate: count = 10, distinct success_criteria, diversified pages, difficulty banding holds.
-6. Write `tasks.json`. Halt if validation fails (per Decision Gate in `SKILL.md`).
+6. Write `tasks.json`. Halt if validation fails (per Decision Gates in `SKILL.md`).
 
 ## Failure mode
 
-If the doc has fewer than 10 testable library-level claims, STOP and record this in `manifest.json` under `task_generation_shortfall: <count>`. Halt Stage 2.
+If the doc has fewer than 10 testable library-level claims, STOP and record this in `manifest.json` under `task_generation_shortfall: <count>`. Halt the run.

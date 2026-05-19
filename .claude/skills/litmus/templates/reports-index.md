@@ -2,7 +2,7 @@
 
 > Rendered to `<cwd>/.litmus/reports-index.md`. Append-only — each Litmus run appends one row at the bottom. Prior rows are never modified or removed.
 >
-> If the file does not exist, Stage 5 creates it with the header block below, then appends the first row.
+> If the file does not exist, the report step creates it with the header block below, then appends the first row.
 
 ## Header block (write once on file creation)
 

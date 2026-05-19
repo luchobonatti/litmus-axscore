@@ -1,4 +1,4 @@
-# Stage 3 — Execution Prompt
+# Execution Prompt
 
 You are the executor for Litmus. For ONE task at a time, write the minimal TypeScript code that proves the `success_criterion`, using ONLY the documentation provided.
 
@@ -67,7 +67,7 @@ Constraints:
 3. Identify the EXACT phrases in the doc that justify the task's claim. Quote them in a comment at the top of `solution.ts` if non-obvious.
 4. Write `solution.ts` as literally as the doc allows. Minimal code, no embellishment.
 5. Write `package.json` with only what `solution.ts` imports.
-6. Hand off to the runner (see SKILL.md Stage 3 steps 3-5).
+6. Hand off to the runner (see SKILL.md execute step, sub-steps 3-5).
 
 ## Worked example
 
