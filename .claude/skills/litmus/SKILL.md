@@ -15,13 +15,13 @@ Run when the user asks to evaluate, score, or audit a documentation site for AI 
 
 **Input:** one HTTP(S) URL pointing to a **documentation site or section** (e.g. `docs.example.com`, `example.com/docs`). NOT a marketing landing, repo, demo, or aggregator.
 
-**Output:** inline scorecard, `<cwd>/litmus-report.md`, and structured artifacts under `<cwd>/.litmus/run-<TS>/`.
+**Output:** inline scorecard, `<cwd>/litmus-report-<TS>.md` (timestamped, one per run), an append-only `.litmus/reports-index.md`, and structured artifacts under `<cwd>/.litmus/run-<TS>/`.
 
 Do NOT run when: the URL is missing/invalid, clearly not a docs site, or the user wants only a quick readability lint (use AFDocs for that — Litmus is heavier).
 
 ## Hard Rules
 
-- Write only under `<cwd>/.litmus/` and `<cwd>/litmus-report.md`. Never write elsewhere.
+- Write only under `<cwd>/.litmus/` and `<cwd>/litmus-report-<TS>.md`. Never write elsewhere. Never overwrite a prior report — each run gets its own timestamped file.
 - Never read `.env`, credentials, or env vars beyond what `npm install` needs.
 - All fetches via `curl -fsSL` (Bash) or `fetch()` (Node). NEVER use model-mediated fetch (e.g. WebFetch) for existence checks, raw content, OR conversion.
 - HTML→markdown via a deterministic local tool: `turndown` (via `node -e` or `npx -y turndown-cli`) or `pandoc`. Record the tool in `manifest.json` under `conversion_method`.
@@ -44,7 +44,8 @@ Do NOT run when: the URL is missing/invalid, clearly not a docs site, or the use
 | Fewer than 3 pages selectable in Stage 1 | Halt; insufficient content |
 | Task generation produces ≠ 10 tasks | Halt; report Stage 2 failure |
 | No portable timeout mechanism available | Set `enforced_timeout: false` in `result.json`; continue |
-| `<cwd>/litmus-report.md` already exists | Overwrite and note it in the inline summary |
+| `<cwd>/litmus-report-<TS>.md` already exists (same `<TS>`) | Append `-N` suffix to the timestamp |
+| `.litmus/reports-index.md` does not exist | Create it from the template header, then append this run's row |
 
 ## Execution Steps
 
@@ -64,8 +65,8 @@ Do NOT run when: the URL is missing/invalid, clearly not a docs site, or the use
    5. Capture stdout, stderr, exit code in `result.json`.
    6. Delete `node_modules/`.
 6. **Stage 4 — Evaluate.** Apply [`prompts/evaluation.md`](prompts/evaluation.md) to each `result.json`. Build `evaluations.json` per the schema defined there.
-7. **Stage 5 — Report.** Compute Execution Score: `round(passed / total * 100)`. Render [`templates/scorecard.md`](templates/scorecard.md) inline in the chat. Render [`templates/full-report.md`](templates/full-report.md) to `<cwd>/litmus-report.md`. Aggregate fix suggestions by `responsible_section`; prioritize sections by failure count.
-8. **Summarize.** Print one line: `Litmus complete. Execution Score: <N>/100 (<grade>). Full report: <cwd>/litmus-report.md`.
+7. **Stage 5 — Report.** Compute Execution Score: `round(passed / total * 100)`. Render [`templates/scorecard.md`](templates/scorecard.md) inline in the chat. Render [`templates/full-report.md`](templates/full-report.md) to `<cwd>/litmus-report-<TS>.md` (timestamped, never overwrites prior runs). Append one row to `<cwd>/.litmus/reports-index.md` using [`templates/reports-index.md`](templates/reports-index.md) — create the file with its header if missing. Aggregate fix suggestions by `responsible_section`; prioritize sections by failure count.
+8. **Summarize.** Print one line: `Litmus complete. Execution Score: <N>/100 (<grade>). Full report: <cwd>/litmus-report-<TS>.md. History: <cwd>/.litmus/reports-index.md`.
 
 ## Output Contract
 
@@ -74,7 +75,8 @@ Do NOT run when: the URL is missing/invalid, clearly not a docs site, or the use
 - `<run-dir>/tasks.json`
 - `<run-dir>/executions/task-NNN/{solution.ts, package.json, result.json, install.log, stdout.log, stderr.log}` (×10, no `node_modules/`)
 - `<run-dir>/evaluations.json`
-- `<cwd>/litmus-report.md`
+- `<cwd>/litmus-report-<TS>.md` (one per run; never overwritten)
+- `<cwd>/.litmus/reports-index.md` (append-only history index across runs)
 - One-line summary in chat.
 
 ## Grade mapping
@@ -110,4 +112,5 @@ Do NOT run when: the URL is missing/invalid, clearly not a docs site, or the use
 - `prompts/execution.md` — Stage 3 instructions
 - `prompts/evaluation.md` — Stage 4 instructions (with worked examples)
 - `templates/scorecard.md` — inline scorecard format
-- `templates/full-report.md` — full report format
+- `templates/full-report.md` — per-run full report format
+- `templates/reports-index.md` — historical index row format and table header

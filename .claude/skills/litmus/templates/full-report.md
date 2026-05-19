@@ -1,6 +1,6 @@
 # Full Report Template
 
-> Rendered to `<cwd>/litmus-report.md` at the end of a Litmus run. Suitable for both human reading and machine processing.
+> Rendered to `<cwd>/litmus-report-<TS>.md` at the end of a Litmus run. Each run gets its own file — prior runs are never overwritten. A summary row is appended to `.litmus/reports-index.md` by Stage 5; see `reports-index.md` template for that format. Suitable for both human reading and machine processing.
 >
 > Placeholders use `{{double_braces}}`. The agent substitutes from `manifest.json`, `tasks.json`, and `evaluations.json`.
 

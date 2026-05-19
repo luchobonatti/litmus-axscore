@@ -28,7 +28,8 @@ Litmus Report — {{hostname}}
 
   Methodology: {{conversion_method}} for HTML→md, {{task_count}} tasks library-level, non-interactive scope.
 
-Full report: {{cwd}}/litmus-report.md
+Full report: {{cwd}}/litmus-report-{{ts}}.md
+History:     {{cwd}}/.litmus/reports-index.md
 ```
 
 ## Substitution rules
