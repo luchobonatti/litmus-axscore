@@ -2,7 +2,7 @@
 
 > Rendered to `<cwd>/.litmus/reports-index.md`. Append-only — each Litmus run appends one row at the bottom. Prior rows are never modified or removed.
 >
-> If the file does not exist, Stage 5 creates it with the header block below, then appends the first row.
+> If the file does not exist, the report step creates it with the header block below, then appends the first row.
 
 ## Header block (write once on file creation)
 
@@ -52,10 +52,6 @@ Columns:
 
 ## Edge cases
 
-- **All tasks errored.** Score `N/A`, Grade `—`. Row still gets appended so the run is logged.
-- **Stage halted before evaluation.** Append a row with `Score: HALTED`, `Grade: —`, `Tasks: — / — / —`, and the run dir path so a maintainer can debug.
-- **File somehow truncated or invalid.** Do NOT auto-repair. Halt with a clear error message and instruct the user to inspect the file. Loss of history is preferable to silent corruption.
-
-## Why append-only
-
-Append-only writes are atomic on POSIX filesystems for sizes well below 4 KiB (a single row is < 500 bytes). Concurrent runs from the same cwd will not corrupt the index. Read-modify-write would require locking that this skill does not assume.
+- **All tasks errored.** Score `N/A`, Grade `—`. Row still gets appended.
+- **Run halted before evaluation.** Append a row with `Score: HALTED`, `Grade: —`, `Tasks: — / — / —`, and the run dir path.
+- **File truncated or invalid.** Do NOT auto-repair. Halt with a clear error message and instruct the user to inspect the file.

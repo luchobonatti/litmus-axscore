@@ -50,8 +50,7 @@ The Litmus deliverable itself (`.claude/skills/litmus/`) MUST be authored throug
 |-------|------|---------|
 | `sdlc:issue` | `.claude/skills/issue/` | Create GitHub issues from briefs against the repo's templates |
 | `sdlc:create-pr` | `.claude/skills/create-pr/` | Create pull requests filled from git context and linked issue |
-| `litmus-spike` | `.claude/skills/litmus-spike/` | Minimal 4-stage Litmus pipeline for Spike #2 validation |
-| `litmus` | `.claude/skills/litmus/` (TBD) | Production Litmus skill — authored during M2 |
+| `litmus` | `.claude/skills/litmus/` | Evaluate a docs site for AI-agent use and produce an Execution Score |
 
 ## Architecture
 

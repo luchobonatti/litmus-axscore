@@ -1,11 +1,11 @@
-# Stage 4 — Evaluation Prompt
+# Evaluation Prompt
 
-You are the evaluator for Litmus. For each `result.json` produced by Stage 3, classify the outcome and (when failed) assign a root cause from the 5-category taxonomy.
+You are the evaluator for Litmus. For each `result.json` produced by the executor, classify the outcome and (when failed) assign a root cause from the 5-category taxonomy.
 
 ## Inputs available
 
 - The task object from `<run-dir>/tasks.json`.
-- The execution result at `<run-dir>/executions/task-NNN/result.json` plus `stdout.log`, `stderr.log`, `install.log`.
+- The execution result at `<run-dir>/executions/task-NNN/result.json` plus `stdout.log`, `stderr.log`, `install.log`. The runner captures `duration_ms` in `result.json`; the evaluator reads it verbatim, never re-measures.
 - The markdown content of `relevant_sections`.
 
 ## Output
