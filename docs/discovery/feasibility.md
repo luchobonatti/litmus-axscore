@@ -136,7 +136,7 @@ None. Greenfield project.
 
 ## Design Decisions
 
-This section records architectural choices made during M2/v1.1 development, surfaced by validation runs. They are documented here (not in `architecture.md`) because they belong to the rationale layer — *why* the skill behaves a given way, not *how* it's structured.
+This section records architectural choices made during M2/v1.0 development, surfaced by validation runs. They are documented here (not in `architecture.md`) because they belong to the rationale layer — *why* the skill behaves a given way, not *how* it's structured.
 
 ### DD-1 — Out-of-scope docs are rejected at Stage 2, not at Stage 0
 
@@ -154,7 +154,7 @@ This section records architectural choices made during M2/v1.1 development, surf
 - v1.0 / v1.1 keep a uniform 4-source ingest path (llms.txt → sitemap → BFS → cap-and-select), independent of doc language.
 - A future v2 that supports multiple execution languages would change the question, not the architecture: the language scope expands, but the rejection still happens at Stage 2 based on what was found, not at Stage 0 based on what was guessed.
 
-**Status.** Implemented in SKILL.md v1.1 via the Stage 2 halt-classification rule.
+**Status.** Implemented in SKILL.md v1.0 via the Stage 2 halt-classification rule.
 
 ## Sign-off
 
