@@ -4,7 +4,7 @@ description: "Trigger: run litmus on, litmus check, evaluate docs at, score doc 
 license: Apache-2.0
 metadata:
   author: bootnode
-  version: "1.1"
+  version: "1.0"
 ---
 
 # litmus

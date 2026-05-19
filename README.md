@@ -10,7 +10,7 @@ Unlike existing tools (AFDocs, Mintlify Agent Score, Fern Agent Score) that meas
 
 ## Install
 
-Litmus is a Claude Code skill, currently at version **1.1**. Install it once at the user level so it's available in every Claude Code session.
+Litmus is a Claude Code skill, currently at version **1.0**. Install it once at the user level so it's available in every Claude Code session.
 
 ```bash
 git clone https://github.com/luchobonatti/litmus-axscore.git /tmp/litmus
