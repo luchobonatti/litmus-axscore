@@ -26,7 +26,7 @@ Do NOT run when: the URL is missing/invalid, clearly not a docs site, or the use
 - All fetches via `curl -fsSL` (Bash) or `fetch()` (Node). NEVER use model-mediated fetch (e.g. WebFetch) for existence checks, raw content, OR conversion.
 - HTML→markdown via a deterministic local tool: `turndown` (via `node -e` or `npx -y turndown-cli`) or `pandoc`. Record the tool in `manifest.json` under `conversion_method`.
 - Each stage produces a structured artifact. Later stages MUST only read prior artifacts — never recompute.
-- Add `.litmus/` to `.gitignore` if a `.git` directory is present.
+- Add `.litmus/` to `.gitignore` IF a `.git` directory is present AND `.litmus/` is not already an exact line in `.gitignore`. Idempotent — never appends duplicates. Same rule applies for `litmus-report*.md`: only add when absent.
 - `<TS>` is ISO-8601 UTC compact: `YYYYMMDDTHHMMSSZ` (e.g. `20260518T145200Z`).
 - All paths passed to Bash MUST be absolute. `cwd` is not reliable between calls.
 - Tasks must be runnable in isolation: no `@/src/...` imports, no scaffold-dependent paths. Test library-level claims only.
@@ -50,7 +50,7 @@ Do NOT run when: the URL is missing/invalid, clearly not a docs site, or the use
 ## Execution Steps
 
 1. **Validate input.** Reject non-HTTP(S) URLs or obviously non-doc URLs.
-2. **Initialize run dir.** Create `<cwd>/.litmus/run-<TS>/`. Update `.gitignore` if in git. Write `manifest.json` with `{input_url, ts, skill_version, conversion_method, interactive_flows_skipped: []}`.
+2. **Initialize run dir.** Create `<cwd>/.litmus/run-<TS>/`. If `.git` is present, ensure `.gitignore` contains `.litmus/` and `litmus-report*.md` — append each only when not already an exact line (idempotent). Write `manifest.json` with `{input_url, ts, skill_version, conversion_method, interactive_flows_skipped: []}`.
 3. **Stage 1 — Ingest.**
    1. Try `curl -fsSL <url>/llms.txt`. If 200 + non-HTML, parse links under sections titled `Documentation`/`Docs`/`Reference`/`Guides`. Exclude `Optional`/`GitHub`/`Repository`/`Demo`. Keep input-hostname URLs only.
    2. Else try `curl -fsSL <url>/sitemap.xml`. Filter to URLs under the input URL's path prefix.
