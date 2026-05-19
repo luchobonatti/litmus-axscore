@@ -130,11 +130,11 @@ M1 (Spike)  ──blocks──▶  M2 (MVP)  ──blocks──▶  M3 (Validati
 
 ## M5 — AFDocs Integration (v1.1)
 
-**Goal.** Add Readability Score by integrating AFDocs as Stage 1.
+**Goal.** Add Readability Score by integrating AFDocs as a pre-ingest step.
 
 **Scope.**
 - Pin to a tested AFDocs version.
-- Implement Stage 1 per PRD §7.2.
+- Implement the readability check per PRD §7.2.
 - Combined scorecard (Readability + Execution + Overall Grade).
 - Graceful degradation if AFDocs fails.
 

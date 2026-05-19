@@ -136,25 +136,25 @@ None. Greenfield project.
 
 ## Design Decisions
 
-This section records architectural choices made during M2/v1.1 development, surfaced by validation runs. They are documented here (not in `architecture.md`) because they belong to the rationale layer — *why* the skill behaves a given way, not *how* it's structured.
+This section records architectural choices made during M2/v1.0 development, surfaced by validation runs. They are documented here (not in `architecture.md`) because they belong to the rationale layer — *why* the skill behaves a given way, not *how* it's structured.
 
-### DD-1 — Out-of-scope docs are rejected at Stage 2, not at Stage 0
+### DD-1 — Out-of-scope docs are rejected at task generation, not by a pre-ingest language check
 
-**Context.** The Foundry validation run (M3, see `docs/validation/foundry-run-1.md`) halted in Stage 2 with `task_generation_shortfall: 0`. Foundry's documentation is Rust + Solidity, well outside Litmus v1.0's TS-only execution scope. The question surfaced: should Litmus pre-filter these docs in a hypothetical Stage 0 (language-fit detection)?
+**Context.** The Foundry validation run (M3, see `docs/validation/foundry-run-1.md`) halted at task generation with `task_generation_shortfall: 0`. Foundry's documentation is Rust + Solidity, well outside Litmus v1.0's TS-only execution scope. The question surfaced: should Litmus pre-filter these docs with a language-fit detection step before ingestion?
 
-**Decision.** **Keep Stage 2 halt as the rejection point.** No Stage 0 language-fit check.
+**Decision.** **Keep the task-generation halt as the rejection point.** No pre-ingest language-fit check.
 
 **Rationale.**
-- A Stage 0 language detector would rely on heuristics (code-fence languages, import-path patterns, top-level URL structure). Each heuristic has plausible false positives: a TS doc with a Bash quickstart, a polyglot SDK doc with separate sections per language, a doc that documents both client TS and server Solidity.
-- Stage 1 ingestion provides *evidence* for the rejection: the ingested pages and their categories are written to `manifest.json` and `pages.json`. A maintainer reading the halt output sees "49 pages ingested, 0 library-level claims found" — which is more diagnostic than "rejected by heuristic before reading the doc."
-- The cost of running Stage 1 against a misfit doc is small (≤ 30 seconds of fetches + conversion), bounded by the URL cap.
-- Friction #22 (closed alongside this decision) enriches the halt with a `halt_classification` (`scope_mismatch` vs `low_quality` vs `insufficient_content`), so the Stage 2 halt now distinguishes "wrong tool for the doc" from "doc has gaps." That distinction is what users actually need.
+- A pre-ingest language detector would rely on heuristics (code-fence languages, import-path patterns, top-level URL structure). Each heuristic has plausible false positives: a TS doc with a Bash quickstart, a polyglot SDK doc with separate sections per language, a doc that documents both client TS and server Solidity.
+- Ingestion provides *evidence* for the rejection: the ingested pages and their categories are written to `manifest.json` and `pages.json`. A maintainer reading the halt output sees "49 pages ingested, 0 library-level claims found" — which is more diagnostic than "rejected by heuristic before reading the doc."
+- The cost of running ingestion against a misfit doc is small (≤ 30 seconds of fetches + conversion), bounded by the URL cap.
+- Friction #22 (closed alongside this decision) enriches the halt with a `halt_classification` (`scope_mismatch` vs `low_quality` vs `insufficient_content`), so the task-generation halt now distinguishes "wrong tool for the doc" from "doc has gaps." That distinction is what users actually need.
 
 **Implications.**
-- v1.0 / v1.1 keep a uniform 4-source ingest path (llms.txt → sitemap → BFS → cap-and-select), independent of doc language.
-- A future v2 that supports multiple execution languages would change the question, not the architecture: the language scope expands, but the rejection still happens at Stage 2 based on what was found, not at Stage 0 based on what was guessed.
+- v1.0 keeps a uniform 4-source ingest path (llms.txt → sitemap → BFS → cap-and-select), independent of doc language.
+- A future v2 that supports multiple execution languages would change the question, not the architecture: the language scope expands, but the rejection still happens at task generation based on what was found, not by a pre-ingest guess.
 
-**Status.** Implemented in SKILL.md v1.1 via the Stage 2 halt-classification rule.
+**Status.** Implemented in SKILL.md v1.0 via the task-generation halt-classification rule.
 
 ## Sign-off
 
