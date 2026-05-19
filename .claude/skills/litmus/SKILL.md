@@ -42,7 +42,7 @@ Do NOT run when: the URL is missing/invalid, clearly not a docs site, or the use
 | `<cwd>/.litmus/run-<TS>/` exists | Append `-N` suffix |
 | Stage artifact invalid or unparseable | Halt; report which stage failed |
 | Fewer than 3 pages selectable in Stage 1 | Halt; insufficient content |
-| Task generation produces ≠ 10 tasks | Halt; report Stage 2 failure |
+| Task generation produces < 10 library-level claims | Halt; record `manifest.halt_classification` per Stage 2 rule |
 | No portable timeout mechanism available | Set `enforced_timeout: false` in `result.json`; continue |
 | `<cwd>/litmus-report-<TS>.md` already exists (same `<TS>`) | Append `-N` suffix to the timestamp |
 | `.litmus/reports-index.md` does not exist | Create it from the template header, then append this run's row |
@@ -66,6 +66,13 @@ Do NOT run when: the URL is missing/invalid, clearly not a docs site, or the use
       3. Strip nav/footer/scripts (HTML path only — native markdown is already clean).
       4. Write `ingested/content/<slug>.md` and append to `ingested/pages.json` with `[{url, slug, title, headings, char_count, category}]`. Category labels follow `prompts/task-generation.md`.
 4. **Stage 2 — Generate.** Apply [`prompts/task-generation.md`](prompts/task-generation.md) to `pages.json` and the ingested markdown. Produce exactly 10 TypeScript tasks, library-level only, diversified across pages and difficulty. Write `tasks.json`.
+   - If fewer than 10 library-level claims are found, **halt** and record in `manifest.json`:
+     - `task_generation_shortfall: <count>` — the count of library-level claims found (0 to 9).
+     - `halt_classification` — one of:
+       - `scope_mismatch` when `pages_ingested >= 5 AND library_level_claims == 0` (doc describes a non-TS ecosystem — e.g. the Foundry validation run).
+       - `low_quality` when `pages_ingested >= 5 AND 0 < library_level_claims < 10` (testable surface exists but insufficient breadth).
+       - `insufficient_content` when `pages_ingested < 5` (Stage 1 underdelivered, regardless of language fit).
+   - The downstream report (Stage 5) uses `halt_classification` to distinguish "this doc is out of Litmus's scope" from "this doc has issues to fix" — both are honest signals, but they mean different things to the doc maintainer.
 5. **Stage 3 — Execute.** For each task, apply [`prompts/execution.md`](prompts/execution.md):
    1. Create `executions/task-NNN/`.
    2. Write `solution.ts` and `package.json` (`{name, private: true, type: "module", dependencies}`). No `tsx` dep. No `tsconfig.json`.
