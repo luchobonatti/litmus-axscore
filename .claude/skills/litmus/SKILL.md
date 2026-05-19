@@ -65,9 +65,10 @@ Do NOT run when: the URL is missing/invalid, clearly not a docs site, or the use
    1. Create `executions/task-NNN/`.
    2. Write `solution.ts` and `package.json` (`{name, private: true, type: "module", dependencies}`). No `tsx` dep. No `tsconfig.json`.
    3. Run `npm install --prefer-offline --no-audit --no-fund --silent` (capture to `install.log`).
-   4. Run with portable 60s timeout: `gtimeout 60 npx tsx solution.ts` (macOS), `timeout 60 npx tsx solution.ts` (Linux), or fall back per Decision Gate.
-   5. Capture stdout, stderr, exit code in `result.json`.
-   6. Delete `node_modules/`.
+   4. Capture `start_ts = Date.now()` immediately before launching the run command.
+   5. Run with portable 60s timeout: `gtimeout 60 npx tsx solution.ts` (macOS), `timeout 60 npx tsx solution.ts` (Linux), or fall back per Decision Gate. Capture `end_ts = Date.now()` immediately after the process exits.
+   6. Capture stdout, stderr, exit code, and `duration_ms` (= `end_ts - start_ts`) in `result.json`. Set `duration_ms_captured: true` in `manifest.json`.
+   7. Delete `node_modules/`.
 6. **Stage 4 — Evaluate.** Apply [`prompts/evaluation.md`](prompts/evaluation.md) to each `result.json`. Build `evaluations.json` per the schema defined there.
 7. **Stage 5 — Report.** Compute Execution Score: `round(passed / total * 100)`. Render [`templates/scorecard.md`](templates/scorecard.md) inline in the chat. Render [`templates/full-report.md`](templates/full-report.md) to `<cwd>/litmus-report-<TS>.md` (timestamped, never overwrites prior runs). Append one row to `<cwd>/.litmus/reports-index.md` using [`templates/reports-index.md`](templates/reports-index.md) — create the file with its header if missing. Aggregate fix suggestions by `responsible_section`; prioritize sections by failure count.
 8. **Summarize.** Print one line: `Litmus complete. Execution Score: <N>/100 (<grade>). Full report: <cwd>/litmus-report-<TS>.md. History: <cwd>/.litmus/reports-index.md`.

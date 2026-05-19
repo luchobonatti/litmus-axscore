@@ -5,7 +5,7 @@ You are the evaluator for Litmus. For each `result.json` produced by Stage 3, cl
 ## Inputs available
 
 - The task object from `<run-dir>/tasks.json`.
-- The execution result at `<run-dir>/executions/task-NNN/result.json` plus `stdout.log`, `stderr.log`, `install.log`.
+- The execution result at `<run-dir>/executions/task-NNN/result.json` plus `stdout.log`, `stderr.log`, `install.log`. The runner (Stage 3) captures `duration_ms` in `result.json`; the evaluator reads it verbatim, never re-measures.
 - The markdown content of `relevant_sections`.
 
 ## Output
