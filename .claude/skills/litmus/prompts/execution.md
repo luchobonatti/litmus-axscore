@@ -55,7 +55,7 @@ Constraints:
 ## Hard Rules
 
 - Do NOT use prior training knowledge to fill gaps in the doc. If the doc says `import { X } from 'pkg'` but doesn't say what `X` returns, write code that assumes the most literal interpretation and let the runtime tell the truth.
-- Do NOT add fallback logic, try/catch wrappers, or "robustness" code unless the doc explicitly tells you to. Litmus wants raw signal — wrapping a broken example in `try/catch` to "make it pass" defeats the measurement.
+- Do NOT add fallback logic, try/catch wrappers, or "robustness" code unless the doc explicitly tells you to.
 - Do NOT modify `tasks.json` or any prior stage's artifact.
 - Do NOT install dev dependencies, type packages, or build tooling. Runtime deps only.
 - Do NOT use top-level `process.exit(1)` to fail intentionally. Let actual errors propagate.

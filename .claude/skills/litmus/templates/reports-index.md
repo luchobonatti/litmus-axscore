@@ -53,5 +53,5 @@ Columns:
 ## Edge cases
 
 - **All tasks errored.** Score `N/A`, Grade `—`. Row still gets appended.
-- **Stage halted before evaluation.** Append a row with `Score: HALTED`, `Grade: —`, `Tasks: — / — / —`, and the run dir path.
+- **Run halted before evaluation.** Append a row with `Score: HALTED`, `Grade: —`, `Tasks: — / — / —`, and the run dir path.
 - **File truncated or invalid.** Do NOT auto-repair. Halt with a clear error message and instruct the user to inspect the file.

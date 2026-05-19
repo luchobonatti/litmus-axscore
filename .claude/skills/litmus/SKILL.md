@@ -106,18 +106,6 @@ Do NOT run when: the URL is missing/invalid, or clearly not a docs site.
 | ≥ 60 | D |
 | < 60 | F |
 
-## Common Mistakes
-
-- Accepting a marketing landing, repo, or demo URL instead of a docs URL.
-- Using model-mediated fetch (e.g. WebFetch) for any I/O — destroys reproducibility.
-- Following all `llms.txt` URLs blindly. Filter to doc-section URLs on input hostname.
-- Generating scaffold-dependent tasks (`@/src/*` imports). Use library-level claims.
-- Trying to script interactive CLIs via `expect` or stdin injection. Skip them and record in `manifest.json`.
-- Adding `tsx` as a task dependency. Use `npx tsx`.
-- Forgetting to delete `node_modules/` after the execute step.
-- Recomputing in a later step what an earlier step already produced.
-- Using relative paths in Bash arguments — `cwd` is not reliable between calls.
-
 ## References
 
 - `prompts/task-generation.md`

@@ -44,7 +44,7 @@ History:     {{cwd}}/.litmus/reports-index.md
 - `{{interactive_flows_count}}` — `manifest.interactive_flows_skipped.length`.
 - `{{conversion_method}}` — from `manifest.conversion_method`.
 - `{{cwd}}` — current working directory absolute path.
-- `{{category_padded}}` / `{{section_padded}}` — the corresponding `{{category}}` / `{{section}}` value left-aligned in a 30-character-wide field, padded with spaces. If the value is ≥ 30 chars, append exactly one space before the count. Computed by the renderer, not a literal placeholder. Used to align the count column visually in monospace output.
+- `{{category_padded}}` / `{{section_padded}}` — the corresponding `{{category}}` / `{{section}}` value left-aligned in a 30-character-wide field, padded with spaces. If the value is ≥ 30 chars, append exactly one space before the count. Computed by the renderer, not a literal placeholder.
 
 ## Edge cases
 
