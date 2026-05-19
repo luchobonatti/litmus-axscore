@@ -112,8 +112,6 @@ Litmus evaluates documentation by generating executable tasks that test what the
 - **HTML→markdown conversion:** `{{conversion_method}}`.
 - **Pages ingested:** {{ingested_pages_count}} (Stage 1).
 
-For more detail on the pipeline and its data contracts, see [`docs/discovery/project-brief.md`](docs/discovery/project-brief.md) and [`architecture.md`](architecture.md) in the Litmus repo.
-
 ## Artifacts
 
 All structured outputs for this run are under `{{cwd}}/.litmus/run-{{ts}}/`:

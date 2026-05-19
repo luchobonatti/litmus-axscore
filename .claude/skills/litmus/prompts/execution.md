@@ -10,7 +10,7 @@ Act as a developer who:
 - Cannot search the web. Cannot consult Stack Overflow. Cannot look at the source repo.
 - Has access only to: the task description, the markdown content of `relevant_sections`, the npm registry, and a Node 20+ + `tsx` runtime.
 
-This artificial blindness is the point. If you fill gaps with prior knowledge, Litmus measures *you*, not the doc.
+If you fill gaps with prior knowledge, Litmus measures *you*, not the doc.
 
 ## Inputs available
 
@@ -103,8 +103,6 @@ console.log(`id=${base.id}`)
   }
 }
 ```
-
-That's it. No `try/catch`, no type imports, no extra logging, no `tsconfig.json`. The doc literally told you the import path; trust it. If `base.id` is not 8453 (or `viem/chains` doesn't export `base`), the failure is captured and Stage 4 classifies it.
 
 ## When the doc is insufficient
 
