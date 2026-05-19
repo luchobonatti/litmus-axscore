@@ -54,8 +54,13 @@ Do NOT run when: the URL is missing/invalid, clearly not a docs site, or the use
 3. **Stage 1 — Ingest.**
    1. Try `curl -fsSL <url>/llms.txt`. If 200 + non-HTML, parse links under sections titled `Documentation`/`Docs`/`Reference`/`Guides`. Exclude `Optional`/`GitHub`/`Repository`/`Demo`. Keep input-hostname URLs only.
    2. Else try `curl -fsSL <url>/sitemap.xml`. Filter to URLs under the input URL's path prefix.
-   3. Else BFS from input URL: max 50 pages, same hostname, max depth 3.
-   4. For each candidate page (up to 50):
+   3. Else BFS from input URL: same hostname, max depth 3.
+   4. **Cap and select.** If the candidate set from steps 1-3 exceeds 50, apply this deterministic selection (never random, never LLM-mediated):
+      1. Categorize each URL using the path patterns in `prompts/task-generation.md` (quickstart, recipe, reference, advanced, other).
+      2. Take up to 12 per category in source order, iterating categories in this priority: quickstart → recipe → reference → advanced → other.
+      3. If still under 50 after categorical sampling, fill the remainder from the largest underused category, preserving source order.
+      4. Stop at 50 total. Record the kept and dropped counts in `manifest.json` under `selection: {candidates_total, kept, dropped, per_category}`.
+   5. For each candidate page (up to 50):
       1. **Try native markdown first.** Fetch `<page-url>.md` (append `.md` to the page URL). If 200 with `Content-Type: text/markdown` (or `text/plain` when the path already ends in `.md`), use the response body directly. Set `conversion_method: 'native-markdown'` in `manifest.json`.
       2. **Else fetch the HTML version** and convert via the deterministic local tool (turndown or pandoc per Hard Rules). Set `conversion_method` to the tool used (`turndown`, `pandoc`, etc.).
       3. Strip nav/footer/scripts (HTML path only — native markdown is already clean).
