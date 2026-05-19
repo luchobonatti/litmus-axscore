@@ -21,7 +21,7 @@ Do NOT run when: the URL is missing/invalid, clearly not a docs site, or the use
 
 ## Hard Rules
 
-- Write only under `<cwd>/.litmus/` and `<cwd>/litmus-report-<TS>.md`. Never write elsewhere. Never overwrite a prior report — each run gets its own timestamped file.
+- Write only under `<cwd>/.litmus/` and `<cwd>/litmus-report-<TS>.md`. The single exception is `<cwd>/.gitignore`, which the rule below explicitly authorizes the runner to append to (idempotently). Never write anywhere else. Never overwrite a prior report — each run gets its own timestamped file.
 - Never read `.env`, credentials, or env vars beyond what `npm install` needs.
 - All fetches via `curl -fsSL` (Bash) or `fetch()` (Node). NEVER use model-mediated fetch (e.g. WebFetch) for existence checks, raw content, OR conversion.
 - HTML→markdown via a deterministic local tool: `turndown` (via `node -e` or `npx -y turndown-cli`) or `pandoc`. Record the tool in `manifest.json` under `conversion_method`.

@@ -18,12 +18,12 @@ Litmus Report — {{hostname}}
 
   Top failure types:
 {{#each top_failure_types}}
-    {{category}}{{padded_to_30}} {{count}}
+    {{category_padded}} {{count}}
 {{/each}}
 
   Top problem sections:
 {{#each top_problem_sections}}
-    {{section}}{{padded_to_30}} {{count}} failures
+    {{section_padded}} {{count}} failures
 {{/each}}
 
   Methodology: {{conversion_method}} for HTML→md, {{task_count}} tasks library-level, non-interactive scope.
@@ -44,6 +44,7 @@ History:     {{cwd}}/.litmus/reports-index.md
 - `{{interactive_flows_count}}` — `manifest.interactive_flows_skipped.length`.
 - `{{conversion_method}}` — from `manifest.conversion_method`.
 - `{{cwd}}` — current working directory absolute path.
+- `{{category_padded}}` / `{{section_padded}}` — the corresponding `{{category}}` / `{{section}}` value left-aligned in a 30-character-wide field, padded with spaces. If the value is ≥ 30 chars, append exactly one space before the count. Computed by the renderer, not a literal placeholder. Used to align the count column visually in monospace output.
 
 ## Edge cases
 
