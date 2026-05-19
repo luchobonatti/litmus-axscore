@@ -18,11 +18,13 @@ Write `<run-dir>/tasks.json` as an array of 10 task objects. Schema:
   "language": "typescript",
   "success_criterion": "Objective condition the run must satisfy. e.g. 'Process exits 0 and stdout contains foo=bar'.",
   "relevant_sections": ["page-slug-1", "page-slug-2"],
-  "expected_dependencies": ["pkg-name@version-spec"],
+  "expected_dependencies": ["pkg-name"],
   "difficulty": "basic | intermediate | advanced",
   "category": "quickstart | recipe | reference | advanced"
 }
 ```
+
+`expected_dependencies` is an array of **bare package names** (no version spec). Stage 3 (see `prompts/execution.md`) resolves each entry to `"latest"` when authoring `package.json`, unless the relevant doc section pins a specific version, in which case the agent uses that version verbatim. This keeps the schema simple and avoids drift between the task definition and the resolved install spec.
 
 ## Hard Rules
 

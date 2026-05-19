@@ -13,7 +13,7 @@ Append-only log of Litmus runs in this working directory. Each row records one r
 
 Columns:
 
-- **TS** — ISO-8601 UTC timestamp from `manifest.ts`, also used as the `<TS>` suffix in the report filename.
+- **TS** — ISO-8601 UTC timestamp from the `ts` field in `manifest.json`, also used as the `<TS>` suffix in the report filename.
 - **Hostname** — host portion of the doc URL evaluated.
 - **Input URL** — full URL passed to Litmus.
 - **Score** — Execution Score (0-100) or `N/A` when no tasks ran.
@@ -34,7 +34,7 @@ Columns:
 
 ## Substitution rules
 
-- `{{ts}}` — from `manifest.ts`, ISO-8601 UTC compact (`YYYYMMDDTHHMMSSZ`).
+- `{{ts}}` — from the `ts` field in `manifest.json`, ISO-8601 UTC compact (`YYYYMMDDTHHMMSSZ`).
 - `{{hostname}}` — `URL(manifest.input_url).hostname`.
 - `{{input_url}}` — `manifest.input_url`, displayed verbatim.
 - `{{score}}` — `round(passed / total * 100)` from `evaluations.json`. When `total === 0` (no tasks ran), write `N/A`.
