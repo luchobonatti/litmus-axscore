@@ -55,7 +55,11 @@ Do NOT run when: the URL is missing/invalid, clearly not a docs site, or the use
    1. Try `curl -fsSL <url>/llms.txt`. If 200 + non-HTML, parse links under sections titled `Documentation`/`Docs`/`Reference`/`Guides`. Exclude `Optional`/`GitHub`/`Repository`/`Demo`. Keep input-hostname URLs only.
    2. Else try `curl -fsSL <url>/sitemap.xml`. Filter to URLs under the input URL's path prefix.
    3. Else BFS from input URL: max 50 pages, same hostname, max depth 3.
-   4. Fetch each candidate page (up to 50), convert HTML→markdown per Hard Rules. Strip nav/footer/scripts. Write `ingested/content/<slug>.md` and `ingested/pages.json` with `[{url, slug, title, headings, char_count, category}]`. Category labels follow `prompts/task-generation.md`.
+   4. For each candidate page (up to 50):
+      1. **Try native markdown first.** Fetch `<page-url>.md` (append `.md` to the page URL). If 200 with `Content-Type: text/markdown` (or `text/plain` when the path already ends in `.md`), use the response body directly. Set `conversion_method: 'native-markdown'` in `manifest.json`.
+      2. **Else fetch the HTML version** and convert via the deterministic local tool (turndown or pandoc per Hard Rules). Set `conversion_method` to the tool used (`turndown`, `pandoc`, etc.).
+      3. Strip nav/footer/scripts (HTML path only — native markdown is already clean).
+      4. Write `ingested/content/<slug>.md` and append to `ingested/pages.json` with `[{url, slug, title, headings, char_count, category}]`. Category labels follow `prompts/task-generation.md`.
 4. **Stage 2 — Generate.** Apply [`prompts/task-generation.md`](prompts/task-generation.md) to `pages.json` and the ingested markdown. Produce exactly 10 TypeScript tasks, library-level only, diversified across pages and difficulty. Write `tasks.json`.
 5. **Stage 3 — Execute.** For each task, apply [`prompts/execution.md`](prompts/execution.md):
    1. Create `executions/task-NNN/`.
