@@ -2,57 +2,76 @@
 
 > An AI agent skill that evaluates how well a documentation site works for AI agents executing real integration tasks.
 
-**Status:** Phase 1 (Discovery) complete. Implementation begins after the Spike M1 lands. See [`docs/discovery/`](docs/discovery/) for product context.
-
 ## What it does
 
-Litmus takes a documentation URL and produces an **Execution Score** — a measurement of whether an AI coding agent can actually complete real tasks using only the documentation provided. The score is accompanied by a per-task report classifying failures by root cause, and a prioritized list of doc sections that need attention.
+Litmus takes a documentation URL and produces an **Execution Score** — a measurement of whether an AI coding agent can complete real tasks using only the documentation provided. The score is paired with a per-task breakdown classifying failures by root cause and a prioritized list of doc sections to fix.
 
-Unlike existing tools (AFDocs, Mintlify Agent Score, Fern Agent Score) which measure *readability* — can an agent parse the docs? — Litmus measures *execution* — can the agent actually do anything with them?
+Unlike existing tools (AFDocs, Mintlify Agent Score, Fern Agent Score) that measure *readability* — can an agent parse the docs? — Litmus measures *execution* — can the agent actually do anything with them?
 
-## Status
+## Install
 
-This is a working repository, not a released product. Tracking issues live in [Issues](../../issues). The current milestone is **M1 — Spike: Pipeline Reliability Validation** (see [`docs/discovery/roadmap.md`](docs/discovery/roadmap.md)).
+Litmus is a Claude Code skill. Install it once at the user level so it's available in every Claude Code session.
 
-A v1.0 release is gated on:
+```bash
+git clone https://github.com/luchobonatti/litmus-axscore.git /tmp/litmus
+mkdir -p ~/.claude/skills
+cp -r /tmp/litmus/.claude/skills/litmus ~/.claude/skills/
+```
 
-1. Spike validation that Claude Code can reliably drive the pipeline from a `SKILL.md` (M1).
-2. MVP implementation against `dappbooster.dev` (M2).
-3. Single-doc benchmark calibration (M3).
+Or, to use it only inside a specific project, clone the repo and run Claude Code from the project root — the skill lives under `.claude/skills/litmus/` and Claude Code picks it up automatically.
 
-## Stack
+**Requirements:** Node.js ≥ 20 (for `npx tsx`), `curl`, and either `turndown` (via `node -e` or `npx -y turndown-cli`) or `pandoc` for HTML→markdown conversion.
 
-| Layer | Choice |
-|---|---|
-| Distribution | Claude Code skill (`.claude/skills/litmus/`) |
-| Language | TypeScript (strict) |
-| Runtime | Node.js ≥ 20 |
-| Task executor | `npx tsx` |
-| Host agent (MVP) | Claude Code only |
+## Quickstart
 
-See [`architecture.md`](architecture.md) for details.
-
-## Repo Layout
+In a Claude Code session inside any working directory (Litmus writes only under that directory), tell the agent:
 
 ```
-.claude/skills/         Skills installed in this repo
-  litmus/               The Litmus skill (the deliverable — built during M2)
-  issue/                /sdlc:issue (from bootnode-sdlc starter-kit)
-  create-pr/            /sdlc:create-pr (from bootnode-sdlc starter-kit)
+run litmus on https://docs.example.com
+```
 
-docs/discovery/         Phase 1 outcomes (brief, feasibility, roadmap)
+Litmus crawls the site, generates 10 TypeScript tasks that test what the doc claims is possible, runs them in isolation, evaluates the outcomes, and prints a scorecard plus the path to a full report.
 
-.github/                Issue and PR templates
+## What you get
+
+After a run:
+
+- An inline scorecard in chat with the Execution Score, grade, pass/fail/errored counts, top failure types, and top problem sections.
+- A timestamped full report at `<cwd>/litmus-report-<TS>.md` containing the score, the prioritized fix list (sections ranked by failure count), per-task detail, and methodology.
+- An append-only history index at `<cwd>/.litmus/reports-index.md` with one row per run (timestamp, hostname, score, grade, paths).
+- Structured artifacts under `<cwd>/.litmus/run-<TS>/`: the ingested pages, the generated tasks, each task's execution (solution.ts, logs, result.json), and the evaluations.
+
+See [`.claude/skills/litmus/templates/full-report.md`](.claude/skills/litmus/templates/full-report.md) for the report shape.
+
+## Scope
+
+Litmus v1.x measures **library-level TypeScript claims**. It does not validate:
+
+- Interactive CLI wizards (`pnpm dlx <wizard>`, `vue create`, etc.) — skipped and reported as such.
+- Tasks requiring API keys, paid services, or external credentials.
+- Documentation for non-TypeScript ecosystems (Rust, Solidity, Python, etc.) — Litmus halts at the generate step with a `scope_mismatch` classification.
+
+A doc that scores low because its surface is mostly non-TS or wizard-driven is an *agent-friendliness* signal, not a doc quality verdict.
+
+## Repo layout
+
+```
+.claude/skills/
+  litmus/      The Litmus skill (the deliverable)
+  issue/       /sdlc:issue
+  create-pr/   /sdlc:create-pr
+
+docs/discovery/   Product brief, feasibility, roadmap
+docs/validation/  Per-run validation reports
+
+architecture.md   Pipeline data flow
+CLAUDE.md         Agent operating manual for this repo
 ```
 
 ## Contributing
 
-This project follows [BootNode's AI-enhanced SDLC](https://github.com/bootnode/sdlc): Discovery → Definition → Execution → Review → Release. Every PR closes an issue. Every issue is born from a template via `/sdlc:issue`.
-
-- Conventional Commits enforced
-- One issue, one PR
-- See [`CLAUDE.md`](CLAUDE.md) for the full operating manual
+PRs are welcome. Each PR closes an issue, follows [Conventional Commits](https://www.conventionalcommits.org/), and is reviewed before merge. See [`CLAUDE.md`](CLAUDE.md) for the full operating manual.
 
 ## License
 
-TBD — to be decided at M4 (public release).
+Apache-2.0. See [`LICENSE`](LICENSE).
