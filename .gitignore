@@ -9,3 +9,4 @@ build/
 .vercel
 .atl/
 litmus-report*.md
+docs/validation/
