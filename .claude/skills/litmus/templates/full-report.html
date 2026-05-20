@@ -1,0 +1,379 @@
+# Full Report HTML Template
+
+> Rendered to `<cwd>/litmus-report-<TS>.html` at the end of a Litmus run, alongside the markdown report. Single-file HTML — embedded CSS, inline SVG, no external dependencies.
+>
+> Placeholders use `{{double_braces}}`. The agent substitutes from `manifest.json`, `tasks.json`, and `evaluations.json` per the substitution rules at the foot of this file.
+
+<!-- BEGIN TEMPLATE CONTENT — everything between this marker and the matching END marker is written verbatim to the report file, with `{{placeholders}}` substituted per the rules below. -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Litmus Report — {{hostname}}</title>
+<style>
+:root {
+  --bg: #0a0a0a;
+  --fg: #f5f1e8;
+  --fg-muted: #8a857a;
+  --border: #1f1f1f;
+  --surface: #141414;
+  --grade-a: #30a46c;
+  --grade-b: #94ba1f;
+  --grade-c: #f5a623;
+  --grade-d: #e58c2d;
+  --grade-f: #e5484d;
+  --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 4rem 2rem;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  line-height: 1.6;
+}
+.container { max-width: 960px; margin: 0 auto; }
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--border);
+}
+.brand { display: flex; align-items: center; gap: 1rem; }
+.brand-mark { width: 24px; height: 32px; }
+.brand-name { font-family: var(--font-mono); font-size: 1rem; letter-spacing: 0.15em; }
+.meta { font-family: var(--font-mono); font-size: 0.8rem; color: var(--fg-muted); text-align: right; line-height: 1.5; }
+.hero { padding: 5rem 0 3rem; text-align: center; }
+.hero-grade {
+  font-family: var(--font-mono);
+  font-size: 10rem;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+}
+.hero-grade.a { color: var(--grade-a); }
+.hero-grade.b { color: var(--grade-b); }
+.hero-grade.c { color: var(--grade-c); }
+.hero-grade.d { color: var(--grade-d); }
+.hero-grade.f { color: var(--grade-f); }
+.hero-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+  margin-top: 1.5rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.hero-marker {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--fg-muted);
+  margin-top: 0.5rem;
+}
+.axes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 3rem 0;
+}
+.axis {
+  padding: 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+.axis-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+.axis-value {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+.axis-score { font-family: var(--font-mono); font-size: 2.5rem; font-weight: 600; }
+.axis-max { font-family: var(--font-mono); font-size: 0.9rem; color: var(--fg-muted); }
+.axis-grade { font-family: var(--font-mono); font-size: 1.5rem; font-weight: 600; margin-left: auto; }
+.axis-grade.a { color: var(--grade-a); }
+.axis-grade.b { color: var(--grade-b); }
+.axis-grade.c { color: var(--grade-c); }
+.axis-grade.d { color: var(--grade-d); }
+.axis-grade.f { color: var(--grade-f); }
+.axis-meta { font-family: var(--font-mono); font-size: 0.8rem; color: var(--fg-muted); margin-top: 0.5rem; }
+.axis-unavailable { color: var(--fg-muted); font-family: var(--font-mono); font-size: 0.95rem; margin-top: 0.75rem; }
+section { margin: 4rem 0; }
+section h2 {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--fg-muted);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.75rem;
+  margin: 0 0 1.5rem;
+  font-weight: 500;
+}
+.category-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+}
+.category-name { color: var(--fg-muted); }
+.category-score { text-align: right; font-variant-numeric: tabular-nums; }
+.fix-item { padding: 1.25rem 0; border-bottom: 1px solid var(--border); }
+.fix-item:last-child { border-bottom: 0; }
+.fix-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+.fix-section { color: var(--fg); }
+.fix-count { color: var(--fg-muted); }
+.fix-cause {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--grade-f);
+  margin-top: 0.5rem;
+  letter-spacing: 0.05em;
+}
+.fix-suggestion { margin-top: 0.5rem; font-size: 0.95rem; }
+details {
+  margin: 0.5rem 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+details summary {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  user-select: none;
+  list-style: none;
+}
+details summary::-webkit-details-marker { display: none; }
+details summary::before {
+  content: '▸';
+  display: inline-block;
+  margin-right: 0.5rem;
+  color: var(--fg-muted);
+  transition: transform 0.15s;
+}
+details[open] summary::before { transform: rotate(90deg); }
+.task-status { display: inline-block; min-width: 64px; font-weight: 600; }
+.task-status.passed { color: var(--grade-a); }
+.task-status.failed { color: var(--grade-f); }
+.task-status.errored { color: var(--grade-d); }
+.task-body { padding: 1rem; font-size: 0.9rem; border-top: 1px solid var(--border); }
+.task-body p { margin: 0.5rem 0; }
+.task-body pre {
+  background: var(--bg);
+  padding: 0.75rem;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin: 0.5rem 0;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+.task-body code { font-family: var(--font-mono); font-size: 0.85rem; }
+footer {
+  margin-top: 5rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+  letter-spacing: 0.05em;
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div class="brand">
+    <svg class="brand-mark" viewBox="0 0 24 32" xmlns="http://www.w3.org/2000/svg" aria-label="Litmus">
+      <defs>
+        <linearGradient id="litmus-grad" x1="0" y1="1" x2="0" y2="0">
+          <stop offset="0%" stop-color="#e5484d"/>
+          <stop offset="33%" stop-color="#f5a623"/>
+          <stop offset="66%" stop-color="#94ba1f"/>
+          <stop offset="100%" stop-color="#30a46c"/>
+        </linearGradient>
+      </defs>
+      <rect x="6" y="2" width="12" height="28" rx="1" fill="url(#litmus-grad)"/>
+    </svg>
+    <span class="brand-name">LITMUS</span>
+  </div>
+  <div class="meta">
+    {{input_url}}<br>
+    {{ts}} · v{{skill_version}}
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-grade {{overall_grade_lower}}">{{overall_grade}}</div>
+  <div class="hero-label">Overall Grade</div>
+  {{#if overall_marker}}
+  <div class="hero-marker">{{overall_marker}}</div>
+  {{/if}}
+</section>
+
+<section class="axes">
+  <div class="axis">
+    <div class="axis-label">Readability</div>
+    {{#if readability}}
+    <div class="axis-value">
+      <span class="axis-score">{{readability.overall_score}}</span>
+      <span class="axis-max">/ 100</span>
+      <span class="axis-grade {{readability.overall_grade_lower}}">{{readability.overall_grade}}</span>
+    </div>
+    <div class="axis-meta">{{readability.pages_tested}} pages · afdocs {{readability.afdocs_version}}</div>
+    {{/if}}
+    {{#if readability_partial}}
+    <div class="axis-unavailable">partial — {{readability_partial.pages_tested}} pages tested</div>
+    {{/if}}
+    {{#if readability_unavailable}}
+    <div class="axis-unavailable">unavailable — {{readability_unavailable.reason}}</div>
+    {{/if}}
+  </div>
+
+  <div class="axis">
+    <div class="axis-label">Execution</div>
+    <div class="axis-value">
+      <span class="axis-score">{{score}}</span>
+      <span class="axis-max">/ 100</span>
+      <span class="axis-grade {{grade_lower}}">{{grade}}</span>
+    </div>
+    <div class="axis-meta">{{passed}} passed · {{failed}} failed · {{errored}} errored</div>
+  </div>
+</section>
+
+{{#if readability}}
+<section>
+  <h2>Readability breakdown</h2>
+  <div class="category-grid">
+    <span class="category-name">content-discoverability</span>
+    <span class="category-score">{{readability.categories.content-discoverability}}</span>
+    <span class="category-name">markdown-availability</span>
+    <span class="category-score">{{readability.categories.markdown-availability}}</span>
+    <span class="category-name">page-size</span>
+    <span class="category-score">{{readability.categories.page-size}}</span>
+    <span class="category-name">content-structure</span>
+    <span class="category-score">{{readability.categories.content-structure}}</span>
+    <span class="category-name">url-stability</span>
+    <span class="category-score">{{readability.categories.url-stability}}</span>
+    <span class="category-name">observability</span>
+    <span class="category-score">{{readability.categories.observability}}</span>
+    <span class="category-name">authentication</span>
+    <span class="category-score">{{readability.categories.authentication}}</span>
+  </div>
+</section>
+{{/if}}
+
+{{#if no_failures}}
+<section>
+  <h2>Prioritized fix list</h2>
+  <p>No execution failures detected. The doc supported all {{total}} generated tasks.</p>
+</section>
+{{/if}}
+
+{{#if prioritized_sections}}
+<section>
+  <h2>Prioritized fix list</h2>
+  {{#each prioritized_sections}}
+  <div class="fix-item">
+    <div class="fix-header">
+      <span class="fix-section">{{rank}}. <code>{{section_slug}}</code></span>
+      <span class="fix-count">{{failure_count}} failure(s)</span>
+    </div>
+    {{#each failures_in_section}}
+    <div class="fix-cause">{{task_id}} · {{root_cause}}</div>
+    <div class="fix-suggestion">{{fix_suggestion}}</div>
+    {{/each}}
+  </div>
+  {{/each}}
+</section>
+{{/if}}
+
+<section>
+  <h2>Per-task detail</h2>
+  {{#each tasks_with_evaluations}}
+  <details>
+    <summary>
+      <span class="task-status {{status}}">{{status}}</span>
+      <span>{{id}}</span>
+    </summary>
+    <div class="task-body">
+      <p><strong>Description:</strong> {{description}}</p>
+      <p><strong>Success criterion:</strong> {{success_criterion}}</p>
+      <p><strong>Outcome:</strong> exit code <code>{{exit_code}}</code>, duration {{duration_ms}}ms</p>
+      {{#if stdout_excerpt}}
+      <p><strong>Stdout:</strong></p>
+      <pre>{{stdout_excerpt}}</pre>
+      {{/if}}
+      {{#if failed}}
+      <p><strong>Root cause:</strong> <code>{{root_cause}}</code></p>
+      <p><strong>Responsible section:</strong> <code>{{responsible_section}}</code></p>
+      <p><strong>Fix suggestion:</strong> {{fix_suggestion}}</p>
+      {{/if}}
+      {{#if errored}}
+      <p><strong>Error phase:</strong> {{error_phase}}</p>
+      <p><strong>Error message:</strong> <code>{{error_message}}</code></p>
+      {{/if}}
+    </div>
+  </details>
+  {{/each}}
+</section>
+
+<footer>
+  Litmus v{{skill_version}} · {{task_count}} tasks · HTML→md via {{conversion_method}}
+</footer>
+
+</div>
+</body>
+</html>
+
+<!-- END TEMPLATE CONTENT. The sections below are meta-documentation for the renderer; they do NOT appear in the rendered report. -->
+
+## Substitution rules
+
+Hyphens in path segments (e.g. `categories.content-discoverability`) are literal key characters, not subtraction operators. All field references that exist in `templates/full-report.md` resolve the same way here.
+
+- `{{ts}}`, `{{hostname}}`, `{{input_url}}`, `{{skill_version}}`, `{{conversion_method}}` — from `manifest.json`.
+- `{{readability}}`, `{{readability_partial}}`, `{{readability_unavailable}}` — truthy when the corresponding manifest block is populated. Sub-keys map directly (e.g. `{{readability.overall_score}}`, `{{readability_partial.pages_tested}}`).
+- `{{readability.overall_grade_lower}}` — `manifest.readability.overall_grade` lowercased (used as a CSS class name: `a`, `b`, `c`, `d`, `f`).
+- `{{score}}`, `{{grade}}`, `{{grade_lower}}`, `{{passed}}`, `{{failed}}`, `{{errored}}`, `{{total}}` — computed from `evaluations.json`. `{{grade_lower}}` is `{{grade}}` lowercased.
+- `{{overall_grade}}` — combined per the rule in `SKILL.md`. `{{overall_grade_lower}}` is its lowercased form.
+- `{{overall_marker}}` — the parenthetical suffix when one axis is partial or unavailable (e.g. `(readability partial)`, `(readability unavailable)`). Empty when both axes are present.
+- `{{prioritized_sections}}` — group `evaluations[]` where `status === "failed"` by `responsible_section`, sort by group size desc, then by section slug asc. Each entry: `rank`, `section_slug`, `failure_count`, `failures_in_section[]`.
+- `{{no_failures}}` — boolean: `failed === 0` AND `errored === 0`.
+- `{{tasks_with_evaluations}}` — `tasks.json` joined with `evaluations.json` on `task_id`. Order: by `id` asc. Each entry exposes `id`, `description`, `success_criterion`, `status`, `exit_code`, `duration_ms`, `stdout_excerpt`, and (when failed) `root_cause`, `responsible_section`, `fix_suggestion`, plus (when errored) `error_phase`, `error_message`.
+- `{{task_count}}` — `tasks.json.length`.
+- `{{stdout_excerpt}}` — first 500 chars of `evidence.stdout`; truncate with `…` if longer.
+
+## Edge cases
+
+- **No execution failures.** Render the `{{#if no_failures}}` block instead of the prioritized fix list. Both blocks must not appear together.
+- **Both `readability` and `readability_partial`/`readability_unavailable` populated.** Per `SKILL.md` Decision Gates the run halts before rendering. If reached, render the populated state and skip the others.
+- **HTML escaping.** Treat all `{{...}}` substitutions as plain text by default. `fix_suggestion`, `description`, and `stdout_excerpt` may contain `<`, `>`, `&`, or backticks — escape to `&lt;`, `&gt;`, `&amp;`, `` &#96; `` when substituting into HTML body content. Inside `<code>` and `<pre>` blocks, escape `<` and `>` but leave entities readable.
+- **Brand mark.** The inline SVG is part of the template and is rendered verbatim, no substitution inside it.
+- **External fonts.** The template references Inter and JetBrains Mono by name but does NOT `@import` them. Browsers fall back to system fonts.
+
+## Length budget
+
+Target ≤ 8000 lines for a 10-task run. If the rendered report exceeds this, the renderer truncates per-task `stdout_excerpt` further (down to 200 chars) and flags the truncation in the task-body.
