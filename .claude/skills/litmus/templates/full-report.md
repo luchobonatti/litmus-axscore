@@ -25,7 +25,7 @@
 |----------|-------|
 | content-discoverability | {{readability.categories.content-discoverability}} |
 | markdown-availability | {{readability.categories.markdown-availability}} |
-| page-size-truncation-risk | {{readability.categories.page-size-truncation-risk}} |
+| page-size | {{readability.categories.page-size}} |
 | content-structure | {{readability.categories.content-structure}} |
 | url-stability | {{readability.categories.url-stability}} |
 | observability | {{readability.categories.observability}} |

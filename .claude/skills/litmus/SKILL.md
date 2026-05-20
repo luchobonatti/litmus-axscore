@@ -48,7 +48,7 @@ Do NOT run when: the URL is missing/invalid, or clearly not a docs site.
 | `.litmus/reports-index.md` does not exist | Create it from the template header, then append this run's row |
 | Node major < 22 (measure step) | Set `manifest.readability_unavailable.reason = "node_version"`; continue to ingest |
 | AFDocs install fails (npx exits nonzero, stderr matches `E404\|ENOTFOUND\|npm error`) | Set `manifest.readability_unavailable.reason = "afdocs_install_failed"`; continue |
-| AFDocs returns valid JSON (`jq -e '.summary.score'` succeeds, exit 0 or 1) | Populate `manifest.readability`; do NOT set `readability_unavailable` |
+| AFDocs returns valid JSON (`jq -e '.scoring.overall'` succeeds, exit 0 or 1) | Populate `manifest.readability`; do NOT set `readability_unavailable` |
 | AFDocs exits nonzero and `jq` fails to parse output | Set `manifest.readability_unavailable.reason = "afdocs_runtime_error"`; continue |
 | AFDocs exits 0 but `jq` fails to parse output | Set `manifest.readability_unavailable.reason = "afdocs_invalid_output"`; continue |
 | `readability_unavailable` is set (render step) | Show `—` in Readability column; Overall = execution_grade with `(readability unavailable)` marker |
@@ -76,7 +76,7 @@ Do NOT run when: the URL is missing/invalid, or clearly not a docs site.
    ```
    Capture the exit code. Validate with:
    ```
-   jq -e '.summary.score' .litmus/run-<ts>/readability.json
+   jq -e '.scoring.overall' .litmus/run-<ts>/readability.json
    ```
    Map results per Decision Gates. Always continue to step 4.
 
@@ -134,17 +134,17 @@ Populated when AFDocs produces valid JSON output. Exactly one of `readability` o
 readability: {
   tool: "afdocs",
   version: "0.18.7",
-  overall_score: <0-100>,
-  grade: <"A" | "B" | "C" | "D" | "F">,
-  pages_tested: <integer>,
+  overall_score: <0-100>,            // maps to .scoring.overall
+  grade: <"A+" | "A" | "B" | "C" | "D" | "F">,  // maps to .scoring.grade
+  pages_tested: <integer>,           // maps to .testedPages.length
   categories: {
-    content-discoverability: <0-100>,
-    markdown-availability: <0-100>,
-    page-size-truncation-risk: <0-100>,
-    content-structure: <0-100>,
-    url-stability: <0-100>,
-    observability: <0-100>,
-    authentication: <0-100>
+    content-discoverability: <0-100>,  // .scoring.categoryScores.content-discoverability.score
+    markdown-availability: <0-100>,    // .scoring.categoryScores.markdown-availability.score
+    page-size: <0-100>,                // .scoring.categoryScores.page-size.score
+    content-structure: <0-100>,        // .scoring.categoryScores.content-structure.score
+    url-stability: <0-100>,            // .scoring.categoryScores.url-stability.score
+    observability: <0-100>,            // .scoring.categoryScores.observability.score
+    authentication: <0-100>            // .scoring.categoryScores.authentication.score
   },
   raw_path: "readability.json",
   timestamp: <ISO 8601>
