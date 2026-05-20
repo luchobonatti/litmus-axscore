@@ -17,9 +17,9 @@
 ## Readability
 
 {{#if readability}}
-**Score:** {{readability.overall_score}}/100 — **Grade {{readability.grade}}**
+**Score:** {{readability.overall_score}}/100 — **Grade {{readability.overall_grade}}**
 
-**Pages tested:** {{readability.pages_tested}} · **Tool:** {{readability.tool}} {{readability.version}}
+**Pages tested:** {{readability.pages_tested}} · **Tool:** {{readability.tool}} {{readability.afdocs_version}}
 
 | Category | Score |
 |----------|-------|
@@ -30,6 +30,14 @@
 | url-stability | {{readability.categories.url-stability}} |
 | observability | {{readability.categories.observability}} |
 | authentication | {{readability.categories.authentication}} |
+
+{{#if readability.failed_checks.length}}
+### Failing checks
+
+{{#each readability.failed_checks}}
+- **`{{id}}`** ({{category}}, {{status}}): {{message}}
+{{/each}}
+{{/if}}
 
 **Raw output:** `{{cwd}}/.litmus/run-{{ts}}/readability.json`
 {{/if}}
@@ -161,7 +169,8 @@ All structured outputs for this run are under `{{cwd}}/.litmus/run-{{ts}}/`:
 
 - `{{ts}}` — ISO-8601 UTC compact from the `ts` field in `manifest.json`.
 - `{{hostname}}`, `{{input_url}}`, `{{skill_version}}`, `{{conversion_method}}`, `{{interactive_flows_skipped}}` — from `manifest.json`.
-- `{{readability}}` — truthy when `manifest.readability` is populated; its fields map directly to the sub-keys (e.g. `{{readability.overall_score}}`).
+- `{{readability}}` — truthy when `manifest.readability` is populated; its fields map directly to the sub-keys (e.g. `{{readability.overall_score}}`, `{{readability.overall_grade}}`, `{{readability.afdocs_version}}`).
+- `{{readability.failed_checks}}` — array from `manifest.readability.failed_checks`. Each entry has `id`, `category`, `status` (one of `fail`, `warn`), `message`. Block is omitted when empty.
 - `{{readability_unavailable}}` — truthy when `manifest.readability_unavailable` is populated.
 - `{{score}}`, `{{grade}}`, `{{passed}}`, `{{failed}}`, `{{errored}}`, `{{total}}` — computed from `evaluations.json`.
 - `{{prioritized_sections}}` — group `evaluations[]` where `status === "failed"` by `responsible_section`, sort by group size desc, then by section slug asc. Each entry contains `section_slug`, `failure_count`, `failures_in_section[]`.

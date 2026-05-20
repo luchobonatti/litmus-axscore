@@ -133,10 +133,10 @@ Populated when AFDocs produces valid JSON output. Exactly one of `readability` o
 ```
 readability: {
   tool: "afdocs",
-  version: "0.18.7",
-  overall_score: <0-100>,            // maps to .scoring.overall
-  grade: <"A" | "B" | "C" | "D" | "F">,         // maps to .scoring.grade (clamp "A+" → "A")
-  pages_tested: <integer>,           // maps to .testedPages.length
+  afdocs_version: "0.18.7",
+  overall_score: <0-100>,                       // maps to .scoring.overall
+  overall_grade: <"A" | "B" | "C" | "D" | "F">, // maps to .scoring.grade (clamp "A+" → "A")
+  pages_tested: <integer>,                      // maps to .testedPages.length
   categories: {
     content-discoverability: <0-100>,  // .scoring.categoryScores.content-discoverability.score
     markdown-availability: <0-100>,    // .scoring.categoryScores.markdown-availability.score
@@ -146,6 +146,9 @@ readability: {
     observability: <0-100>,            // .scoring.categoryScores.observability.score
     authentication: <0-100>            // .scoring.categoryScores.authentication.score
   },
+  failed_checks: [                     // .results[] filtered where .status in {"fail", "warn"}
+    { id, category, status, message }
+  ],
   raw_path: "readability.json",
   timestamp: <ISO 8601>
 }
@@ -181,7 +184,7 @@ Computed on the A–F scale from the grade mapping below:
 | ≥ 60 | D |
 | < 60 | F |
 
-AFDocs emits `"A+"` for scores ≥ 95; clamp to `"A"` when populating `manifest.readability.grade`.
+AFDocs emits `"A+"` for scores ≥ 95; clamp to `"A"` when populating `manifest.readability.overall_grade`.
 
 ## References
 

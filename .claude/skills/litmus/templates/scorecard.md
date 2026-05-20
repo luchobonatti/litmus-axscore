@@ -40,7 +40,7 @@ History:     {{cwd}}/.litmus/reports-index.md
 - `{{score}}` — `round(passed / total * 100)`.
 - `{{grade}}` — per the grade mapping in `SKILL.md`.
 - `{{readability_score}}` — `manifest.readability.overall_score`; show `—` when `manifest.readability_unavailable` is set.
-- `{{readability_grade}}` — `manifest.readability.grade`; show `—` when unavailable.
+- `{{readability_grade}}` — `manifest.readability.overall_grade`; show `—` when unavailable.
 - `{{overall_grade}}` — `min(readability_grade, execution_grade)` when both present; `<available_grade> (readability unavailable)` or `<available_grade> (execution unavailable)` when one axis is missing; `—` when both unavailable.
 - `{{total}}`, `{{passed}}`, `{{failed}}`, `{{errored}}` — counts from `evaluations.json`.
 - `{{top_failure_types}}` — top 3 by frequency, descending. Source: `evaluations[].root_cause` (failures only). Omit the block if empty.
