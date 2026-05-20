@@ -49,11 +49,13 @@ Do NOT run when: the URL is missing/invalid, or clearly not a docs site.
 | `.litmus/reports-index.md` does not exist | Create it from the template header, then append this run's row |
 | Node major < 22 (measure step) | Set `manifest.readability_unavailable.reason = "node_version"`; continue to ingest |
 | AFDocs install fails (npx exits nonzero, stderr matches `E404\|ENOTFOUND\|npm error`) | Set `manifest.readability_unavailable.reason = "afdocs_install_failed"`; continue |
-| AFDocs returns valid JSON (`jq -e '.scoring.overall'` succeeds, exit 0 or 1) | Populate `manifest.readability`; do NOT set `readability_unavailable` |
+| AFDocs returns valid JSON, `.testedPages.length >= 3` | Populate `manifest.readability` |
+| AFDocs returns valid JSON, `.testedPages.length < 3` | Populate `manifest.readability_partial` with `reason: "low_sample_count"` |
 | AFDocs exits nonzero and `jq` fails to parse output | Set `manifest.readability_unavailable.reason = "afdocs_runtime_error"`; continue |
 | AFDocs exits 0 but `jq` fails to parse output | Set `manifest.readability_unavailable.reason = "afdocs_invalid_output"`; continue |
 | `readability_unavailable` is set (render step) | Show `—` in Readability column; Overall = execution_grade with `(readability unavailable)` marker |
-| Both `manifest.readability` and `manifest.readability_unavailable` are set, or neither is set, after step 3 | Halt; report invariant violation |
+| `readability_partial` is set (render step) | Show `partial (<n> page sampled)` in Readability column; Overall = execution_grade with `(readability partial)` marker |
+| Multiple of `manifest.readability`, `manifest.readability_partial`, `manifest.readability_unavailable` are set, or none is set, after step 3 | Halt; report invariant violation |
 
 ## Execution Steps
 
@@ -131,7 +133,7 @@ Do NOT run when: the URL is missing/invalid, or clearly not a docs site.
 
 ### Manifest: `readability` block
 
-Populated when AFDocs produces valid JSON output. Exactly one of `readability` or `readability_unavailable` is set after step 3 — never both, never neither.
+Populated when AFDocs produces valid JSON and samples at least 3 pages. Exactly one of `readability`, `readability_partial`, or `readability_unavailable` is set after step 3 — never multiple, never none.
 
 ```
 "readability": {
@@ -157,6 +159,21 @@ Populated when AFDocs produces valid JSON output. Exactly one of `readability` o
 }
 ```
 
+### Manifest: `readability_partial` block
+
+Populated when AFDocs produces valid JSON but samples fewer than 3 pages.
+
+```
+"readability_partial": {
+  "tool": "afdocs",
+  "afdocs_version": "0.18.7",
+  "reason": "low_sample_count",
+  "pages_tested": <integer>,        // < 3
+  "raw_path": "readability.json",
+  "timestamp": <ISO 8601>
+}
+```
+
 ### Manifest: `readability_unavailable` block
 
 Populated when AFDocs cannot run or produces unparseable output.
@@ -175,6 +192,7 @@ Populated when AFDocs cannot run or produces unparseable output.
 
 - Both axes present: the worse of `readability_grade` and `execution_grade`.
 - Readability unavailable: the execution grade with a `(readability unavailable)` suffix — e.g. `B (readability unavailable)`.
+- Readability partial: the execution grade with a `(readability partial)` suffix — e.g. `B (readability partial)`.
 
 ## Grade mapping
 

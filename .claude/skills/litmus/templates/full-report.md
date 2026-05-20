@@ -42,6 +42,15 @@
 **Raw output:** `{{cwd}}/.litmus/run-{{ts}}/readability.json`
 {{/if}}
 
+{{#if readability_partial}}
+**Readability score partial.**
+
+- Reason: `{{readability_partial.reason}}`
+- Pages tested: {{readability_partial.pages_tested}}
+
+Raw output: `{{cwd}}/.litmus/run-{{ts}}/readability.json`
+{{/if}}
+
 {{#if readability_unavailable}}
 **Readability score unavailable.**
 
@@ -171,6 +180,7 @@ All structured outputs for this run are under `{{cwd}}/.litmus/run-{{ts}}/`:
 - `{{hostname}}`, `{{input_url}}`, `{{skill_version}}`, `{{conversion_method}}`, `{{interactive_flows_skipped}}` — from `manifest.json`.
 - `{{readability}}` — truthy when `manifest.readability` is populated; its fields map directly to the sub-keys (e.g. `{{readability.overall_score}}`, `{{readability.overall_grade}}`, `{{readability.afdocs_version}}`). Hyphens in path segments (e.g. `categories.content-discoverability`) are literal key characters.
 - `{{readability.failed_checks}}` — array from `manifest.readability.failed_checks`. Each entry has `id`, `category`, `status` (one of `fail`, `warn`), `message`. Block is omitted when empty.
+- `{{readability_partial}}` — truthy when `manifest.readability_partial` is populated; sub-keys map directly (e.g. `{{readability_partial.pages_tested}}`).
 - `{{readability_unavailable}}` — truthy when `manifest.readability_unavailable` is populated.
 - `{{score}}`, `{{grade}}`, `{{passed}}`, `{{failed}}`, `{{errored}}`, `{{total}}` — computed from `evaluations.json`.
 - `{{prioritized_sections}}` — group `evaluations[]` where `status === "failed"` by `responsible_section`, sort by group size desc, then by section slug asc. Each entry contains `section_slug`, `failure_count`, `failures_in_section[]`.
