@@ -10,7 +10,7 @@ Unlike existing tools (AFDocs, Mintlify Agent Score, Fern Agent Score) that meas
 
 ## Install
 
-Litmus is a Claude Code skill, currently at version **1.0**. Install it once at the user level so it's available in every Claude Code session.
+Litmus is a Claude Code skill, currently at version **1.1**. Install it once at the user level so it's available in every Claude Code session.
 
 ```bash
 git clone https://github.com/luchobonatti/litmus-axscore.git /tmp/litmus
@@ -20,7 +20,7 @@ cp -r /tmp/litmus/.claude/skills/litmus ~/.claude/skills/
 
 Or, to use it only inside a specific project, clone the repo and run Claude Code from the project root — the skill lives under `.claude/skills/litmus/` and Claude Code picks it up automatically.
 
-**Requirements:** Node.js ≥ 20 (for `npx tsx`), `curl`, and either `turndown` (via `node -e` or `npx -y turndown-cli`) or `pandoc` for HTML→markdown conversion.
+**Requirements:** Node.js ≥ 22 (for `npx tsx` and the AFDocs readability step), `curl`, and either `turndown` (via `node -e` or `npx -y turndown-cli`) or `pandoc` for HTML→markdown conversion. AFDocs is fetched per run via `npx afdocs@0.18.7` — no separate install needed.
 
 ## Quickstart
 
