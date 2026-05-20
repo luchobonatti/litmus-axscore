@@ -123,6 +123,15 @@ section h2 {
   margin: 0 0 1.5rem;
   font-weight: 500;
 }
+section h3 {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--fg-muted);
+  margin: 2rem 0 1rem;
+  font-weight: 500;
+}
 .category-grid {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -151,6 +160,13 @@ section h2 {
   letter-spacing: 0.05em;
 }
 .fix-suggestion { margin-top: 0.5rem; font-size: 0.95rem; }
+.fix-resolution {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--fg-muted);
+  border-left: 2px solid var(--border);
+  padding-left: 0.75rem;
+}
 details {
   margin: 0.5rem 0;
   border: 1px solid var(--border);
@@ -283,6 +299,40 @@ footer {
     <span class="category-score">{{readability.categories.authentication}}</span>
   </div>
 </section>
+
+{{#if readability.diagnostics.length}}
+<section>
+  <h2>Readability diagnostics</h2>
+  {{#each readability.diagnostics}}
+  <div class="fix-item">
+    <div class="fix-header">
+      <span class="fix-section"><code>{{id}}</code></span>
+      <span class="fix-count">{{severity}}</span>
+    </div>
+    <div class="fix-suggestion">{{message}}</div>
+    <div class="fix-resolution">Resolution: {{resolution}}</div>
+  </div>
+  {{/each}}
+</section>
+{{/if}}
+
+{{#if readability.failed_checks.length}}
+<section>
+  <h2>Readability failing checks</h2>
+  {{#each readability.failed_checks}}
+  <div class="fix-item">
+    <div class="fix-header">
+      <span class="fix-section"><code>{{id}}</code></span>
+      <span class="fix-count">{{category}} · {{status}}</span>
+    </div>
+    <div class="fix-suggestion">{{message}}</div>
+    {{#if resolution}}
+    <div class="fix-resolution">Resolution: {{resolution}}</div>
+    {{/if}}
+  </div>
+  {{/each}}
+</section>
+{{/if}}
 {{/if}}
 
 {{#if no_failures}}
@@ -357,6 +407,8 @@ Hyphens in path segments (e.g. `categories.content-discoverability`) are literal
 - `{{ts}}`, `{{hostname}}`, `{{input_url}}`, `{{skill_version}}`, `{{conversion_method}}` — from `manifest.json`.
 - `{{readability}}`, `{{readability_partial}}`, `{{readability_unavailable}}` — truthy when the corresponding manifest block is populated. Sub-keys map directly (e.g. `{{readability.overall_score}}`, `{{readability_partial.pages_tested}}`).
 - `{{readability.overall_grade_lower}}` — `manifest.readability.overall_grade` lowercased (used as a CSS class name: `a`, `b`, `c`, `d`, `f`).
+- `{{readability.diagnostics}}` — array from `manifest.readability.diagnostics` (AFDocs `.scoring.diagnostics`). Each entry has `id`, `severity` (`warning` or `critical`), `message`, `resolution`. Block is omitted when empty.
+- `{{readability.failed_checks}}` — array from `manifest.readability.failed_checks`. Each entry has `id`, `category`, `status` (one of `fail`, `warn`), `message`, and optional `resolution` (string or null) joined from AFDocs' `.scoring.resolutions[id]`. Block is omitted when empty.
 - `{{score}}`, `{{grade}}`, `{{grade_lower}}`, `{{passed}}`, `{{failed}}`, `{{errored}}`, `{{total}}` — computed from `evaluations.json`. `{{grade_lower}}` is `{{grade}}` lowercased.
 - `{{overall_grade}}` — combined per the rule in `SKILL.md`. `{{overall_grade_lower}}` is its lowercased form.
 - `{{overall_marker}}` — the parenthetical suffix when one axis is partial or unavailable (e.g. `(readability partial)`, `(readability unavailable)`). Empty when both axes are present.
