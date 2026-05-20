@@ -134,10 +134,10 @@ Bad: `@/src/*` import path requires a scaffold; the hook is project-internal, no
 3. From that list, select 10 claims that satisfy the Hard Rules above.
 4. For each, draft the task object per the schema.
 5. Validate the draft against the Hard Rules: count = 10, distinct success_criteria, diversified pages, difficulty banding holds.
-6. If any validation check fails, discard the draft and return to step 3, drawing different claims from underrepresented bands. Repeat up to 2 additional attempts. After 3 consecutive validation failures, halt with `task_generation_validation_failed: { failed_check, attempts: 3 }` in `manifest.json` and do NOT write `tasks.json`.
+6. If any validation check fails, discard the draft and return to step 3, addressing the specific failed check. Repeat up to 2 additional attempts. After 3 consecutive validation failures, halt with `task_generation_validation_failed: { failed_check, attempts: 3 }` in `manifest.json` and do NOT write `tasks.json`.
 7. Once validation passes, write `tasks.json`.
 
 ## Failure modes
 
 - If the doc has fewer than 10 testable library-level claims, STOP and record `task_generation_shortfall: <count>` in `manifest.json` (and the corresponding `halt_classification`). Halt the run.
-- If post-draft validation fails 3 times consecutively, STOP and record `task_generation_validation_failed: { failed_check, attempts: 3 }` in `manifest.json`. Halt the run.
+- If post-draft validation fails 3 times consecutively, STOP and record `task_generation_validation_failed: { failed_check, attempts: 3 }` in `manifest.json`. Halt the run. `failed_check` is one of `count`, `distinct_success_criteria`, `diversified_pages`, `difficulty_banding`; when multiple checks fail in the same attempt, record the first failing check in that order.

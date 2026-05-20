@@ -103,6 +103,7 @@ Do NOT run when: the URL is missing/invalid, or clearly not a docs site.
        - `scope_mismatch` when `pages_ingested >= 5 AND library_level_claims == 0`.
        - `low_quality` when `pages_ingested >= 5 AND 0 < library_level_claims < 10`.
        - `insufficient_content` when `pages_ingested < 5`.
+   - If post-draft validation fails 3 consecutive times, **halt** and record `task_generation_validation_failed: { failed_check, attempts: 3 }` in `manifest.json`. `failed_check` is one of `count`, `distinct_success_criteria`, `diversified_pages`, `difficulty_banding`; when multiple checks fail in the same attempt, record the first failing check in that order.
 6. **Execute.** For each task, apply [`prompts/execution.md`](prompts/execution.md):
    1. Create `executions/task-NNN/`.
    2. Write `solution.ts` and `package.json` (`{name, private: true, type: "module", dependencies}`). No `tsx` dep. No `tsconfig.json`.
