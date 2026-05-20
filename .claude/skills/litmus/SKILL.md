@@ -70,9 +70,9 @@ Do NOT run when: the URL is missing/invalid, or clearly not a docs site.
    ```
    Then skip to step 4.
 
-   Otherwise run:
+   Otherwise run with portable 300s timeout: `gtimeout 300 ...` (macOS), `timeout 300 ...` (Linux), or omit the prefix if neither is available:
    ```
-   timeout 300 npx --yes afdocs@0.18.7 check "<docs_url>" --format json --score --max-links 50 --sampling deterministic > .litmus/run-<ts>/readability.json 2> .litmus/run-<ts>/readability.stderr.log
+   gtimeout 300 npx --yes afdocs@0.18.7 check "<docs_url>" --format json --score --max-links 50 --sampling deterministic > .litmus/run-<ts>/readability.json 2> .litmus/run-<ts>/readability.stderr.log
    ```
    Capture the exit code. Validate with:
    ```
@@ -135,7 +135,7 @@ readability: {
   tool: "afdocs",
   version: "0.18.7",
   overall_score: <0-100>,            // maps to .scoring.overall
-  grade: <"A+" | "A" | "B" | "C" | "D" | "F">,  // maps to .scoring.grade
+  grade: <"A" | "B" | "C" | "D" | "F">,         // maps to .scoring.grade (clamp "A+" → "A")
   pages_tested: <integer>,           // maps to .testedPages.length
   categories: {
     content-discoverability: <0-100>,  // .scoring.categoryScores.content-discoverability.score
@@ -175,12 +175,13 @@ Computed on the A–F scale from the grade mapping below:
 
 | Score | Grade |
 |-------|-------|
-| ≥ 95 | A+ |
 | ≥ 90 | A |
 | ≥ 80 | B |
 | ≥ 70 | C |
 | ≥ 60 | D |
 | < 60 | F |
+
+AFDocs emits `"A+"` for scores ≥ 95; clamp to `"A"` when populating `manifest.readability.grade`.
 
 ## References
 
