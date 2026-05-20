@@ -85,10 +85,10 @@ Do NOT run when: the URL is missing/invalid, or clearly not a docs site.
    Read `.testedPages` (integer) from the same file to branch between `readability` and `readability_partial`. Map results per Decision Gates. Always continue to step 4.
 
 4. **Ingest.**
-   1. Try `curl -fsSL <url>/llms.txt`. If 200 + non-HTML, parse links under sections titled `Documentation`/`Docs`/`Reference`/`Guides`. Exclude `Optional`/`GitHub`/`Repository`/`Demo`. Keep input-hostname URLs only.
-   2. Else try `curl -fsSL <url>/sitemap.xml`. Filter to URLs under the input URL's path prefix.
-   3. Else BFS from input URL: same hostname, max depth 3.
-   4. **Cap and select.** If the candidate set from steps 1-3 exceeds 50, apply this deterministic selection:
+   1. Try `curl -fsSL <url>/llms.txt`. If 200 + non-HTML, parse links under sections titled `Documentation`/`Docs`/`Reference`/`Guides`. Exclude `Optional`/`GitHub`/`Repository`/`Demo`. Keep input-hostname URLs only. Consider this strategy successful if it yields ≥ 3 candidates.
+   2. If step 1 was unsuccessful, try `curl -fsSL <url>/sitemap.xml`. Filter to URLs under the input URL's path prefix. Successful if it yields ≥ 3 candidates.
+   3. If steps 1 and 2 were both unsuccessful, BFS from input URL: same hostname, max depth 3.
+   4. **Cap and select.** If the candidate set from the successful strategy exceeds 50, apply this deterministic selection:
       1. Categorize each URL using the path patterns in `prompts/task-generation.md` (quickstart, recipe, reference, advanced, other).
       2. Take up to 12 per category in source order, iterating categories in this priority: quickstart → recipe → reference → advanced → other.
       3. If still under 50 after categorical sampling, fill the remainder from the largest underused category, preserving source order. Tie-breaker when two or more categories share the same remaining count: pick by the priority order above (quickstart → recipe → reference → advanced → other).
