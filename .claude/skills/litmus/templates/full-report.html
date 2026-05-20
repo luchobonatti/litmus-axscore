@@ -215,6 +215,13 @@ footer {
   color: var(--fg-muted);
   letter-spacing: 0.05em;
 }
+.footer-attribution { margin-top: 0.75rem; }
+.footer-attribution a {
+  color: var(--fg-muted);
+  text-decoration: none;
+  border-bottom: 1px solid var(--border);
+}
+.footer-attribution a:hover { color: var(--fg); }
 </style>
 </head>
 <body>
@@ -392,6 +399,7 @@ footer {
 
 <footer>
   Litmus v{{skill_version}} · {{task_count}} tasks · HTML→md via {{conversion_method}}
+  <div class="footer-attribution">Powered by <a href="https://bootnode.dev">BootNode</a></div>
 </footer>
 
 </div>
