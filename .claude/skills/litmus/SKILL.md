@@ -43,6 +43,7 @@ Do NOT run when: the URL is missing/invalid, or clearly not a docs site.
 | Step artifact invalid or unparseable | Halt; report which step failed |
 | Fewer than 3 pages selectable during ingest | Halt; insufficient content |
 | Task generation produces < 10 library-level claims | Halt; record `manifest.halt_classification` per the generate-step rule |
+| Task generation validation fails 3 consecutive times | Halt; record `task_generation_validation_failed: { failed_check, attempts }` in `manifest.json` |
 | No portable timeout mechanism available | Set `enforced_timeout: false` in `result.json`; continue |
 | `<cwd>/litmus-report-<TS>.md` already exists (same `<TS>`) | Append `-N` suffix to the timestamp |
 | `.litmus/reports-index.md` does not exist | Create it from the template header, then append this run's row |
