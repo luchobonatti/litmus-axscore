@@ -58,6 +58,7 @@ Constraints:
 - Do NOT add fallback logic, try/catch wrappers, or "robustness" code unless the doc explicitly tells you to.
 - Do NOT modify `tasks.json` or any prior stage's artifact.
 - Do NOT install dev dependencies, type packages, or build tooling. Runtime deps only.
+- Do NOT add resolution flags to `npm install` (e.g. `--legacy-peer-deps`, `--force`). If install fails on a peer-dependency or resolution conflict, let the task error out.
 - Do NOT use top-level `process.exit(1)` to fail intentionally. Let actual errors propagate.
 
 ## Process
