@@ -14,6 +14,35 @@
 
 ---
 
+## Readability
+
+{{#if readability}}
+**Score:** {{readability.overall_score}}/100 — **Grade {{readability.grade}}**
+
+**Pages tested:** {{readability.pages_tested}} · **Tool:** {{readability.tool}} {{readability.version}}
+
+| Category | Score |
+|----------|-------|
+| content-discoverability | {{readability.categories.content-discoverability}} |
+| markdown-availability | {{readability.categories.markdown-availability}} |
+| page-size-truncation-risk | {{readability.categories.page-size-truncation-risk}} |
+| content-structure | {{readability.categories.content-structure}} |
+| url-stability | {{readability.categories.url-stability}} |
+| observability | {{readability.categories.observability}} |
+| authentication | {{readability.categories.authentication}} |
+
+**Raw output:** `{{cwd}}/.litmus/run-{{ts}}/readability.json`
+{{/if}}
+
+{{#if readability_unavailable}}
+**Readability score unavailable.**
+
+- Reason: `{{readability_unavailable.reason}}`
+- Detail: {{readability_unavailable.detail}}
+{{/if}}
+
+---
+
 ## Execution Score
 
 **Score:** {{score}}/100 — **Grade {{grade}}**
@@ -132,6 +161,8 @@ All structured outputs for this run are under `{{cwd}}/.litmus/run-{{ts}}/`:
 
 - `{{ts}}` — ISO-8601 UTC compact from the `ts` field in `manifest.json`.
 - `{{hostname}}`, `{{input_url}}`, `{{skill_version}}`, `{{conversion_method}}`, `{{interactive_flows_skipped}}` — from `manifest.json`.
+- `{{readability}}` — truthy when `manifest.readability` is populated; its fields map directly to the sub-keys (e.g. `{{readability.overall_score}}`).
+- `{{readability_unavailable}}` — truthy when `manifest.readability_unavailable` is populated.
 - `{{score}}`, `{{grade}}`, `{{passed}}`, `{{failed}}`, `{{errored}}`, `{{total}}` — computed from `evaluations.json`.
 - `{{prioritized_sections}}` — group `evaluations[]` where `status === "failed"` by `responsible_section`, sort by group size desc, then by section slug asc. Each entry contains `section_slug`, `failure_count`, `failures_in_section[]`.
 - `{{tasks_with_evaluations}}` — `tasks.json` joined with `evaluations.json` on `task_id`. Order: by `id` asc.
