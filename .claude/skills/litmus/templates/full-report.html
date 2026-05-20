@@ -15,9 +15,12 @@
 <style>
 :root {
   --bg: #0a0a0a;
+  --bg-elev: #131313;
   --fg: #f5f1e8;
   --fg-muted: #8a857a;
-  --border: #1f1f1f;
+  --fg-subtle: #5a564d;
+  --border: #232323;
+  --border-strong: #2e2e2e;
   --surface: #141414;
   --grade-a: #30a46c;
   --grade-b: #94ba1f;
@@ -26,18 +29,21 @@
   --grade-f: #e5484d;
   --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --radius: 6px;
+  --radius-sm: 3px;
 }
-* { box-sizing: border-box; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 body {
-  margin: 0;
-  padding: 4rem 2rem;
   background: var(--bg);
   color: var(--fg);
   font-family: var(--font-ui);
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: 14px;
+  line-height: 1.55;
+  padding: 3rem 2rem;
+  -webkit-font-smoothing: antialiased;
 }
-.container { max-width: 960px; margin: 0 auto; }
+.container { max-width: 880px; margin: 0 auto; }
+
 header {
   display: flex;
   align-items: center;
@@ -45,82 +51,160 @@ header {
   padding-bottom: 2rem;
   border-bottom: 1px solid var(--border);
 }
-.brand { display: flex; align-items: center; gap: 1rem; }
-.brand-mark { width: 24px; height: 32px; }
-.brand-name { font-family: var(--font-mono); font-size: 1rem; letter-spacing: 0.15em; }
-.meta { font-family: var(--font-mono); font-size: 0.8rem; color: var(--fg-muted); text-align: right; line-height: 1.5; }
-.hero { padding: 5rem 0 3rem; text-align: center; }
+.brand { display: flex; align-items: center; gap: 0.85rem; }
+.brand-mark { width: 28px; height: 36px; flex-shrink: 0; }
+.brand-name {
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--fg);
+}
+.meta {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--fg-muted);
+  text-align: right;
+  line-height: 1.6;
+}
+
+.hero {
+  padding: 3.5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.hero-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  margin-bottom: 1.5rem;
+}
+.hero-row {
+  display: flex;
+  align-items: baseline;
+  gap: 2.5rem;
+  flex-wrap: wrap;
+}
 .hero-grade {
   font-family: var(--font-mono);
-  font-size: 10rem;
-  line-height: 1;
+  font-size: 6.5rem;
+  line-height: 0.9;
   font-weight: 600;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.05em;
 }
 .hero-grade.a { color: var(--grade-a); }
 .hero-grade.b { color: var(--grade-b); }
 .hero-grade.c { color: var(--grade-c); }
 .hero-grade.d { color: var(--grade-d); }
 .hero-grade.f { color: var(--grade-f); }
-.hero-label {
+.hero-context { padding-bottom: 0.75rem; }
+.hero-score {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--fg-muted);
-  margin-top: 1.5rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
+  font-size: 1.5rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
 }
-.hero-marker {
+.hero-axes {
   font-family: var(--font-mono);
   font-size: 0.85rem;
   color: var(--fg-muted);
   margin-top: 0.5rem;
 }
+.hero-marker {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--fg-muted);
+  margin-top: 1rem;
+}
+
 .axes {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
-  margin: 3rem 0;
+  margin: 2.5rem 0;
 }
 .axis {
-  padding: 1.5rem;
+  padding: 1.25rem 1.5rem;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius);
+}
+.axis-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
 }
 .axis-label {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--fg-muted);
   text-transform: uppercase;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.18em;
 }
-.axis-value {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
+.axis-grade {
+  font-family: var(--font-mono);
+  font-size: 1.2rem;
+  font-weight: 600;
 }
-.axis-score { font-family: var(--font-mono); font-size: 2.5rem; font-weight: 600; }
-.axis-max { font-family: var(--font-mono); font-size: 0.9rem; color: var(--fg-muted); }
-.axis-grade { font-family: var(--font-mono); font-size: 1.5rem; font-weight: 600; margin-left: auto; }
 .axis-grade.a { color: var(--grade-a); }
 .axis-grade.b { color: var(--grade-b); }
 .axis-grade.c { color: var(--grade-c); }
 .axis-grade.d { color: var(--grade-d); }
 .axis-grade.f { color: var(--grade-f); }
-.axis-meta { font-family: var(--font-mono); font-size: 0.8rem; color: var(--fg-muted); margin-top: 0.5rem; }
-.axis-unavailable { color: var(--fg-muted); font-family: var(--font-mono); font-size: 0.95rem; margin-top: 0.75rem; }
-section { margin: 4rem 0; }
+.axis-score {
+  font-family: var(--font-mono);
+  font-size: 2.25rem;
+  font-weight: 600;
+  margin: 0.5rem 0 0.85rem;
+  letter-spacing: -0.02em;
+}
+.axis-meta {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--fg-muted);
+  margin-top: 0.75rem;
+}
+.axis-unavailable {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  color: var(--fg-muted);
+  margin-top: 0.75rem;
+}
+
+.bar-track {
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--grade-c);
+}
+.bar-fill.a { background: var(--grade-a); }
+.bar-fill.b { background: var(--grade-b); }
+.bar-fill.c { background: var(--grade-c); }
+.bar-fill.d { background: var(--grade-d); }
+.bar-fill.f { background: var(--grade-f); }
+.bar-track-thin {
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+section { margin: 3rem 0; }
 section h2 {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   text-transform: uppercase;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.22em;
   color: var(--fg-muted);
   border-bottom: 1px solid var(--border);
-  padding-bottom: 0.75rem;
-  margin: 0 0 1.5rem;
+  padding-bottom: 0.85rem;
+  margin-bottom: 0.85rem;
   font-weight: 500;
 }
 section h3 {
@@ -131,87 +215,164 @@ section h3 {
   color: var(--fg-muted);
   margin: 2rem 0 1rem;
   font-weight: 500;
+  padding-left: 0.65rem;
+  border-left: 2px solid var(--border-strong);
 }
-.category-grid {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 0.5rem 1rem;
-  font-family: var(--font-mono);
-  font-size: 0.9rem;
+.section-explainer {
+  color: var(--fg-muted);
+  font-size: 0.92rem;
+  margin: 0.75rem 0 1.75rem;
+  max-width: 68ch;
 }
-.category-name { color: var(--fg-muted); }
-.category-score { text-align: right; font-variant-numeric: tabular-nums; }
-.fix-item { padding: 1.25rem 0; border-bottom: 1px solid var(--border); }
-.fix-item:last-child { border-bottom: 0; }
-.fix-header {
+
+.finding {
+  padding: 1rem 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 0.75rem;
+  border-left-width: 3px;
+}
+.finding.warning, .finding.warn { border-left-color: var(--grade-c); }
+.finding.critical, .finding.fail, .finding.failed { border-left-color: var(--grade-f); }
+.finding-header {
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
+  gap: 0.65rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+.finding-badge {
+  display: inline-block;
+  padding: 0.18rem 0.55rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+  background: var(--bg-elev);
+  color: var(--fg-muted);
+}
+.finding.warning .finding-badge, .finding.warn .finding-badge { color: var(--grade-c); }
+.finding.critical .finding-badge, .finding.fail .finding-badge, .finding.failed .finding-badge { color: var(--grade-f); }
+.finding-id { color: var(--fg); font-weight: 500; }
+.finding-meta { color: var(--fg-muted); margin-left: auto; font-size: 0.72rem; }
+.finding-message {
+  margin: 0.65rem 0 0.85rem;
+  font-size: 0.92rem;
+  color: var(--fg);
+}
+.finding-resolution {
+  font-size: 0.88rem;
+  color: var(--fg-muted);
+  padding-left: 0.85rem;
+  border-left: 2px solid var(--border);
+}
+
+.category-list { display: flex; flex-direction: column; gap: 0.85rem; }
+.category-row {
+  display: grid;
+  grid-template-columns: 200px 1fr 36px;
+  gap: 1.25rem;
+  align-items: center;
+}
+.category-name {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--fg-muted);
+}
+.category-score {
   font-family: var(--font-mono);
   font-size: 0.85rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg);
 }
-.fix-section { color: var(--fg); }
-.fix-count { color: var(--fg-muted); }
-.fix-cause {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--grade-f);
-  margin-top: 0.5rem;
-  letter-spacing: 0.05em;
-}
-.fix-suggestion { margin-top: 0.5rem; font-size: 0.95rem; }
-.fix-resolution {
-  margin-top: 0.5rem;
-  font-size: 0.9rem;
-  color: var(--fg-muted);
-  border-left: 2px solid var(--border);
-  padding-left: 0.75rem;
-}
+
 details {
-  margin: 0.5rem 0;
+  margin-bottom: 0.5rem;
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius);
   overflow: hidden;
 }
 details summary {
-  padding: 0.75rem 1rem;
+  padding: 0.85rem 1rem;
   cursor: pointer;
   font-family: var(--font-mono);
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   user-select: none;
   list-style: none;
+  display: grid;
+  grid-template-columns: 16px 60px 90px 1fr;
+  gap: 0.75rem;
+  align-items: center;
 }
 details summary::-webkit-details-marker { display: none; }
 details summary::before {
   content: '▸';
-  display: inline-block;
-  margin-right: 0.5rem;
-  color: var(--fg-muted);
-  transition: transform 0.15s;
+  color: var(--fg-subtle);
+  font-size: 0.85rem;
 }
-details[open] summary::before { transform: rotate(90deg); }
-.task-status { display: inline-block; min-width: 64px; font-weight: 600; }
+details[open] summary::before { content: '▾'; }
+.task-status {
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.65rem;
+}
 .task-status.passed { color: var(--grade-a); }
 .task-status.failed { color: var(--grade-f); }
 .task-status.errored { color: var(--grade-d); }
-.task-body { padding: 1rem; font-size: 0.9rem; border-top: 1px solid var(--border); }
-.task-body p { margin: 0.5rem 0; }
+.task-id { color: var(--fg-muted); }
+.task-description {
+  color: var(--fg);
+  font-family: var(--font-ui);
+  font-size: 0.88rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.task-body {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.88rem;
+}
+.task-body dl { display: grid; grid-template-columns: 140px 1fr; gap: 0.5rem 1rem; }
+.task-body dt {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.task-body dd { font-family: var(--font-ui); }
 .task-body pre {
   background: var(--bg);
   padding: 0.75rem;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   overflow-x: auto;
   margin: 0.5rem 0;
   font-family: var(--font-mono);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
+  color: var(--fg-muted);
+  border: 1px solid var(--border);
 }
-.task-body code { font-family: var(--font-mono); font-size: 0.85rem; }
+.task-body code {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--fg);
+  background: var(--bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: var(--radius-sm);
+}
+
 footer {
-  margin-top: 5rem;
+  margin-top: 4rem;
   padding-top: 2rem;
   border-top: 1px solid var(--border);
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--fg-muted);
   letter-spacing: 0.05em;
 }
@@ -229,16 +390,18 @@ footer {
 
 <header>
   <div class="brand">
-    <svg class="brand-mark" viewBox="0 0 24 32" xmlns="http://www.w3.org/2000/svg" aria-label="Litmus">
+    <svg class="brand-mark" viewBox="0 0 28 36" xmlns="http://www.w3.org/2000/svg" aria-label="Litmus">
       <defs>
         <linearGradient id="litmus-grad" x1="0" y1="1" x2="0" y2="0">
           <stop offset="0%" stop-color="#e5484d"/>
-          <stop offset="33%" stop-color="#f5a623"/>
-          <stop offset="66%" stop-color="#94ba1f"/>
+          <stop offset="25%" stop-color="#e58c2d"/>
+          <stop offset="50%" stop-color="#f5a623"/>
+          <stop offset="75%" stop-color="#94ba1f"/>
           <stop offset="100%" stop-color="#30a46c"/>
         </linearGradient>
       </defs>
-      <rect x="6" y="2" width="12" height="28" rx="1" fill="url(#litmus-grad)"/>
+      <rect x="1.5" y="1.5" width="25" height="33" rx="2" fill="none" stroke="#2e2e2e" stroke-width="1"/>
+      <rect x="8" y="6" width="12" height="24" rx="1" fill="url(#litmus-grad)"/>
     </svg>
     <span class="brand-name">LITMUS</span>
   </div>
@@ -249,8 +412,14 @@ footer {
 </header>
 
 <section class="hero">
-  <div class="hero-grade {{overall_grade_lower}}">{{overall_grade}}</div>
   <div class="hero-label">Overall Grade</div>
+  <div class="hero-row">
+    <div class="hero-grade {{overall_grade_lower}}">{{overall_grade}}</div>
+    <div class="hero-context">
+      <div class="hero-score">Score {{score}} · {{passed}} of {{total}} tasks passed</div>
+      <div class="hero-axes">{{axes_summary}}</div>
+    </div>
+  </div>
   {{#if overall_marker}}
   <div class="hero-marker">{{overall_marker}}</div>
   {{/if}}
@@ -258,14 +427,14 @@ footer {
 
 <section class="axes">
   <div class="axis">
-    <div class="axis-label">Readability</div>
-    {{#if readability}}
-    <div class="axis-value">
-      <span class="axis-score">{{readability.overall_score}}</span>
-      <span class="axis-max">/ 100</span>
-      <span class="axis-grade {{readability.overall_grade_lower}}">{{readability.overall_grade}}</span>
+    <div class="axis-header">
+      <div class="axis-label">Readability</div>
+      {{#if readability}}<div class="axis-grade {{readability.overall_grade_lower}}">{{readability.overall_grade}}</div>{{/if}}
     </div>
-    <div class="axis-meta">{{readability.pages_tested}} pages · afdocs {{readability.afdocs_version}}</div>
+    {{#if readability}}
+    <div class="axis-score">{{readability.overall_score}}</div>
+    <div class="bar-track"><div class="bar-fill {{readability.overall_grade_lower}}" style="width: {{readability.overall_score}}%"></div></div>
+    <div class="axis-meta">{{readability.pages_tested}} pages sampled · afdocs {{readability.afdocs_version}}</div>
     {{/if}}
     {{#if readability_partial}}
     <div class="axis-unavailable">partial — {{readability_partial.pages_tested}} pages tested</div>
@@ -276,122 +445,117 @@ footer {
   </div>
 
   <div class="axis">
-    <div class="axis-label">Execution</div>
-    <div class="axis-value">
-      <span class="axis-score">{{score}}</span>
-      <span class="axis-max">/ 100</span>
-      <span class="axis-grade {{grade_lower}}">{{grade}}</span>
+    <div class="axis-header">
+      <div class="axis-label">Execution</div>
+      <div class="axis-grade {{grade_lower}}">{{grade}}</div>
     </div>
-    <div class="axis-meta">{{passed}} passed · {{failed}} failed · {{errored}} errored</div>
+    <div class="axis-score">{{score}}</div>
+    <div class="bar-track"><div class="bar-fill {{grade_lower}}" style="width: {{score}}%"></div></div>
+    <div class="axis-meta">{{passed}} pass · {{failed}} fail · {{errored}} error</div>
   </div>
 </section>
+
+{{#if has_findings}}
+<section>
+  <h2>Findings</h2>
+  <p class="section-explainer">Actionable changes to apply to your docs. Each item comes from either AFDocs (readability) or Litmus (execution).</p>
+
+  {{#if readability.diagnostics.length}}
+  <h3>Readability — system-level</h3>
+  {{#each readability.diagnostics}}
+  <div class="finding {{severity}}">
+    <div class="finding-header">
+      <span class="finding-badge">{{severity}}</span>
+      <span class="finding-id">{{id}}</span>
+    </div>
+    <div class="finding-message">{{message}}</div>
+    <div class="finding-resolution">{{resolution}}</div>
+  </div>
+  {{/each}}
+  {{/if}}
+
+  {{#if readability.failed_checks.length}}
+  <h3>Readability — per-check</h3>
+  {{#each readability.failed_checks}}
+  <div class="finding {{status}}">
+    <div class="finding-header">
+      <span class="finding-badge">{{status}}</span>
+      <span class="finding-id">{{id}}</span>
+      <span class="finding-meta">{{category}}</span>
+    </div>
+    <div class="finding-message">{{message}}</div>
+    {{#if resolution}}
+    <div class="finding-resolution">{{resolution}}</div>
+    {{/if}}
+  </div>
+  {{/each}}
+  {{/if}}
+
+  {{#if execution_findings.length}}
+  <h3>Execution — per-task</h3>
+  {{#each execution_findings}}
+  <div class="finding failed">
+    <div class="finding-header">
+      <span class="finding-badge">failed</span>
+      <span class="finding-id">{{task_id}}</span>
+      <span class="finding-meta">{{root_cause}} · {{responsible_section}}</span>
+    </div>
+    <div class="finding-message">{{description}}</div>
+    <div class="finding-resolution">{{fix_suggestion}}</div>
+  </div>
+  {{/each}}
+  {{/if}}
+</section>
+{{/if}}
+
+{{#if no_findings}}
+<section>
+  <h2>Findings</h2>
+  <p class="section-explainer">No actionable changes detected. Readability and Execution both passed cleanly.</p>
+</section>
+{{/if}}
 
 {{#if readability}}
 <section>
   <h2>Readability breakdown</h2>
-  <div class="category-grid">
-    <span class="category-name">content-discoverability</span>
-    <span class="category-score">{{readability.categories.content-discoverability}}</span>
-    <span class="category-name">markdown-availability</span>
-    <span class="category-score">{{readability.categories.markdown-availability}}</span>
-    <span class="category-name">page-size</span>
-    <span class="category-score">{{readability.categories.page-size}}</span>
-    <span class="category-name">content-structure</span>
-    <span class="category-score">{{readability.categories.content-structure}}</span>
-    <span class="category-name">url-stability</span>
-    <span class="category-score">{{readability.categories.url-stability}}</span>
-    <span class="category-name">observability</span>
-    <span class="category-score">{{readability.categories.observability}}</span>
-    <span class="category-name">authentication</span>
-    <span class="category-score">{{readability.categories.authentication}}</span>
-  </div>
-</section>
-
-{{#if readability.diagnostics.length}}
-<section>
-  <h2>Readability diagnostics</h2>
-  {{#each readability.diagnostics}}
-  <div class="fix-item">
-    <div class="fix-header">
-      <span class="fix-section"><code>{{id}}</code></span>
-      <span class="fix-count">{{severity}}</span>
+  <div class="category-list">
+    {{#each readability_categories}}
+    <div class="category-row">
+      <span class="category-name">{{label}}</span>
+      <div class="bar-track-thin"><div class="bar-fill {{grade_band}}" style="width: {{score}}%"></div></div>
+      <span class="category-score">{{score}}</span>
     </div>
-    <div class="fix-suggestion">{{message}}</div>
-    <div class="fix-resolution">Resolution: {{resolution}}</div>
-  </div>
-  {{/each}}
-</section>
-{{/if}}
-
-{{#if readability.failed_checks.length}}
-<section>
-  <h2>Readability failing checks</h2>
-  {{#each readability.failed_checks}}
-  <div class="fix-item">
-    <div class="fix-header">
-      <span class="fix-section"><code>{{id}}</code></span>
-      <span class="fix-count">{{category}} · {{status}}</span>
-    </div>
-    <div class="fix-suggestion">{{message}}</div>
-    {{#if resolution}}
-    <div class="fix-resolution">Resolution: {{resolution}}</div>
-    {{/if}}
-  </div>
-  {{/each}}
-</section>
-{{/if}}
-{{/if}}
-
-{{#if no_failures}}
-<section>
-  <h2>Prioritized fix list</h2>
-  <p>No execution failures detected. The doc supported all {{total}} generated tasks.</p>
-</section>
-{{/if}}
-
-{{#if prioritized_sections}}
-<section>
-  <h2>Prioritized fix list</h2>
-  {{#each prioritized_sections}}
-  <div class="fix-item">
-    <div class="fix-header">
-      <span class="fix-section">{{rank}}. <code>{{section_slug}}</code></span>
-      <span class="fix-count">{{failure_count}} failure(s)</span>
-    </div>
-    {{#each failures_in_section}}
-    <div class="fix-cause">{{task_id}} · {{root_cause}}</div>
-    <div class="fix-suggestion">{{fix_suggestion}}</div>
     {{/each}}
   </div>
-  {{/each}}
 </section>
 {{/if}}
 
 <section>
-  <h2>Per-task detail</h2>
+  <h2>Execution detail</h2>
+  <p class="section-explainer">These are the {{task_count}} TypeScript tasks Litmus generated and ran against the docs. Each one tests a specific library-level claim. This is the evidence behind the Execution score.</p>
   {{#each tasks_with_evaluations}}
   <details>
     <summary>
+      <span></span>
       <span class="task-status {{status}}">{{status}}</span>
-      <span>{{id}}</span>
+      <span class="task-id">{{id}}</span>
+      <span class="task-description">{{description}}</span>
     </summary>
     <div class="task-body">
-      <p><strong>Description:</strong> {{description}}</p>
-      <p><strong>Success criterion:</strong> {{success_criterion}}</p>
-      <p><strong>Outcome:</strong> exit code <code>{{exit_code}}</code>, duration {{duration_ms}}ms</p>
-      {{#if stdout_excerpt}}
-      <p><strong>Stdout:</strong></p>
-      <pre>{{stdout_excerpt}}</pre>
-      {{/if}}
-      {{#if failed}}
-      <p><strong>Root cause:</strong> <code>{{root_cause}}</code></p>
-      <p><strong>Responsible section:</strong> <code>{{responsible_section}}</code></p>
-      <p><strong>Fix suggestion:</strong> {{fix_suggestion}}</p>
-      {{/if}}
-      {{#if errored}}
-      <p><strong>Error phase:</strong> {{error_phase}}</p>
-      <p><strong>Error message:</strong> <code>{{error_message}}</code></p>
-      {{/if}}
+      <dl>
+        <dt>Success criterion</dt><dd>{{success_criterion}}</dd>
+        <dt>Outcome</dt><dd>exit code <code>{{exit_code}}</code>, duration {{duration_ms}}ms</dd>
+        {{#if stdout_excerpt}}<dt>Stdout</dt><dd><pre>{{stdout_excerpt}}</pre></dd>{{/if}}
+        {{#if failed}}
+        <dt>Root cause</dt><dd><code>{{root_cause}}</code></dd>
+        <dt>Section</dt><dd><code>{{responsible_section}}</code></dd>
+        <dt>Fix</dt><dd>{{fix_suggestion}}</dd>
+        {{/if}}
+        {{#if errored}}
+        <dt>Error phase</dt><dd>{{error_phase}}</dd>
+        <dt>Error message</dt><dd><code>{{error_message}}</code></dd>
+        {{/if}}
+      </dl>
     </div>
   </details>
   {{/each}}
@@ -415,25 +579,28 @@ Hyphens in path segments (e.g. `categories.content-discoverability`) are literal
 - `{{ts}}`, `{{hostname}}`, `{{input_url}}`, `{{skill_version}}`, `{{conversion_method}}` — from `manifest.json`.
 - `{{readability}}`, `{{readability_partial}}`, `{{readability_unavailable}}` — truthy when the corresponding manifest block is populated. Sub-keys map directly (e.g. `{{readability.overall_score}}`, `{{readability_partial.pages_tested}}`).
 - `{{readability.overall_grade_lower}}` — `manifest.readability.overall_grade` lowercased (used as a CSS class name: `a`, `b`, `c`, `d`, `f`).
-- `{{readability.diagnostics}}` — array from `manifest.readability.diagnostics` (AFDocs `.scoring.diagnostics`). Each entry has `id`, `severity` (`warning` or `critical`), `message`, `resolution`. Block is omitted when empty.
-- `{{readability.failed_checks}}` — array from `manifest.readability.failed_checks`. Each entry has `id`, `category`, `status` (one of `fail`, `warn`), `message`, and optional `resolution` (string or null) joined from AFDocs' `.scoring.resolutions[id]`. Block is omitted when empty.
-- `{{score}}`, `{{grade}}`, `{{grade_lower}}`, `{{passed}}`, `{{failed}}`, `{{errored}}`, `{{total}}` — computed from `evaluations.json`. `{{grade_lower}}` is `{{grade}}` lowercased.
-- `{{overall_grade}}` — combined per the rule in `SKILL.md`. `{{overall_grade_lower}}` is its lowercased form.
-- `{{overall_marker}}` — the parenthetical suffix when one axis is partial or unavailable (e.g. `(readability partial)`, `(readability unavailable)`). Empty when both axes are present.
-- `{{prioritized_sections}}` — group `evaluations[]` where `status === "failed"` by `responsible_section`, sort by group size desc, then by section slug asc. Each entry: `rank`, `section_slug`, `failure_count`, `failures_in_section[]`.
-- `{{no_failures}}` — boolean: `failed === 0` AND `errored === 0`.
+- `{{readability.diagnostics}}` — array from `manifest.readability.diagnostics` (AFDocs `.scoring.diagnostics`). Each entry has `id`, `severity` (`warning` or `critical`), `message`, `resolution`.
+- `{{readability.failed_checks}}` — array from `manifest.readability.failed_checks`. Each entry has `id`, `category`, `status` (`fail` or `warn`), `message`, and optional `resolution` (string or null) joined from AFDocs' `.scoring.resolutions[id]`.
+- `{{readability_categories}}` — derived array of 7 entries, one per AFDocs category. Each: `key` (e.g. `content-discoverability`), `label` (human-readable, e.g. `Content discoverability`), `score` (0-100 from `readability.categories[key]`), `grade_band` (one of `a`/`b`/`c`/`d`/`f` from score-to-grade mapping).
+- `{{score}}`, `{{grade}}`, `{{grade_lower}}`, `{{passed}}`, `{{failed}}`, `{{errored}}`, `{{total}}` — computed from `evaluations.json`.
+- `{{overall_grade}}` — combined per the rule in `SKILL.md`. `{{overall_grade_lower}}` is the lowercased CSS-class form.
+- `{{overall_marker}}` — parenthetical suffix when one axis is partial or unavailable. Empty when both axes are present.
+- `{{axes_summary}}` — short summary string of the two axes. Format: `Readability <N> · Execution <N>` when both present; `Execution <N> (readability partial/unavailable)` when one axis is missing.
+- `{{has_findings}}` — boolean: at least one of `readability.diagnostics`, `readability.failed_checks`, or `execution_findings` is non-empty.
+- `{{no_findings}}` — boolean: all three of the above are empty.
+- `{{execution_findings}}` — flat array derived from failed `evaluations[]`. Each entry: `task_id`, `description` (from `tasks.json`), `root_cause`, `responsible_section`, `fix_suggestion`. Order: by `task_id` asc.
 - `{{tasks_with_evaluations}}` — `tasks.json` joined with `evaluations.json` on `task_id`. Order: by `id` asc. Each entry exposes `id`, `description`, `success_criterion`, `status`, `exit_code`, `duration_ms`, `stdout_excerpt`, and (when failed) `root_cause`, `responsible_section`, `fix_suggestion`, plus (when errored) `error_phase`, `error_message`.
 - `{{task_count}}` — `tasks.json.length`.
 - `{{stdout_excerpt}}` — first 500 chars of `evidence.stdout`; truncate with `…` if longer.
 
 ## Edge cases
 
-- **No execution failures.** Render the `{{#if no_failures}}` block instead of the prioritized fix list. Both blocks must not appear together.
+- **No findings at all.** Render the `{{#if no_findings}}` block instead of the per-sub-block iteration.
 - **Both `readability` and `readability_partial`/`readability_unavailable` populated.** Per `SKILL.md` Decision Gates the run halts before rendering. If reached, render the populated state and skip the others.
-- **HTML escaping.** Treat all `{{...}}` substitutions as plain text by default. `fix_suggestion`, `description`, and `stdout_excerpt` may contain `<`, `>`, `&`, or backticks — escape to `&lt;`, `&gt;`, `&amp;`, `` &#96; `` when substituting into HTML body content. Inside `<code>` and `<pre>` blocks, escape `<` and `>` but leave entities readable.
+- **HTML escaping.** Treat all `{{...}}` substitutions as plain text by default. `fix_suggestion`, `message`, `resolution`, `description`, and `stdout_excerpt` may contain `<`, `>`, `&`, or backticks — escape to `&lt;`, `&gt;`, `&amp;`, `` &#96; `` when substituting into HTML body content.
 - **Brand mark.** The inline SVG is part of the template and is rendered verbatim, no substitution inside it.
 - **External fonts.** The template references Inter and JetBrains Mono by name but does NOT `@import` them. Browsers fall back to system fonts.
 
 ## Length budget
 
-Target ≤ 8000 lines for a 10-task run. If the rendered report exceeds this, the renderer truncates per-task `stdout_excerpt` further (down to 200 chars) and flags the truncation in the task-body.
+Target ≤ 10000 lines for a 10-task run. If the rendered report exceeds this, the renderer truncates per-task `stdout_excerpt` further (down to 200 chars) and flags the truncation in the task-body.
