@@ -23,7 +23,7 @@ cp -r /tmp/litmus/.claude/skills/litmus ~/.claude/skills/
 
 Or, to use it only inside a specific project, clone the repo and run Claude Code from the project root — the skill lives under `.claude/skills/litmus/` and Claude Code picks it up automatically.
 
-**Requirements:** Node.js ≥ 22 (AFDocs 0.18.7 requirement), `curl`, and either `turndown` (via `node -e` or `npx -y turndown-cli`) or `pandoc` for HTML→markdown conversion. AFDocs is fetched per run via `npx afdocs@0.18.7` — no separate install needed.
+**Requirements:** Node.js ≥ 22 (AFDocs 0.18.7), `coreutils` (provides `gtimeout` for per-task timeouts), `jq` (validates AFDocs JSON output), `curl`, and either `turndown` (via `node -e` or `npx -y turndown-cli`) or `pandoc` for HTML→markdown conversion. On macOS: `brew install coreutils jq`. On most Linux distros `coreutils`, `jq`, and `curl` are installed by default. AFDocs is fetched per run via `npx afdocs@0.18.7` — no separate install needed.
 
 ## Quickstart
 
