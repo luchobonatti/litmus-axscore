@@ -4,9 +4,14 @@
 
 ## What it does
 
-Litmus takes a documentation URL and produces an **Execution Score** — a measurement of whether an AI coding agent can complete real tasks using only the documentation provided. The score is paired with a per-task breakdown classifying failures by root cause and a prioritized list of doc sections to fix.
+Litmus takes a documentation URL and produces two scores:
 
-Unlike existing tools (AFDocs, Mintlify Agent Score, Fern Agent Score) that measure *readability* — can an agent parse the docs? — Litmus measures *execution* — can the agent actually do anything with them?
+- A **Readability Score** via [AFDocs](https://afdocs.dev/) — can an agent parse, navigate, and consume the docs?
+- An **Execution Score** (Litmus' own contribution) — can the agent actually complete real integration tasks from those docs?
+
+The **Overall Grade** is the worse of the two on the `F < D < C < B < A` ordering. The report includes a per-task breakdown of execution failures classified by root cause and a prioritized list of doc sections to fix.
+
+Existing tools (Mintlify Agent Score, Fern Agent Score) cover the readability axis. Litmus' contribution is the execution axis and the combined verdict.
 
 ## Install
 
@@ -20,7 +25,7 @@ cp -r /tmp/litmus/.claude/skills/litmus ~/.claude/skills/
 
 Or, to use it only inside a specific project, clone the repo and run Claude Code from the project root — the skill lives under `.claude/skills/litmus/` and Claude Code picks it up automatically.
 
-**Requirements:** Node.js ≥ 22 (for `npx tsx` and the AFDocs readability step), `curl`, and either `turndown` (via `node -e` or `npx -y turndown-cli`) or `pandoc` for HTML→markdown conversion. AFDocs is fetched per run via `npx afdocs@0.18.7` — no separate install needed.
+**Requirements:** Node.js ≥ 22 (required by AFDocs 0.18.7; `npx tsx` itself only needs Node ≥ 18), `curl`, and either `turndown` (via `node -e` or `npx -y turndown-cli`) or `pandoc` for HTML→markdown conversion. AFDocs is fetched per run via `npx afdocs@0.18.7` — no separate install needed.
 
 ## Quickstart
 

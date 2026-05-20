@@ -52,6 +52,7 @@ Do NOT run when: the URL is missing/invalid, or clearly not a docs site.
 | AFDocs exits nonzero and `jq` fails to parse output | Set `manifest.readability_unavailable.reason = "afdocs_runtime_error"`; continue |
 | AFDocs exits 0 but `jq` fails to parse output | Set `manifest.readability_unavailable.reason = "afdocs_invalid_output"`; continue |
 | `readability_unavailable` is set (render step) | Show `—` in Readability column; Overall = execution_grade with `(readability unavailable)` marker |
+| Both `manifest.readability` and `manifest.readability_unavailable` are set, or neither is set, after step 3 | Halt; report invariant violation in `measure` step |
 
 ## Execution Steps
 
@@ -72,11 +73,11 @@ Do NOT run when: the URL is missing/invalid, or clearly not a docs site.
 
    Otherwise run with portable 300s timeout: `gtimeout 300 ...` (macOS), `timeout 300 ...` (Linux), or omit the prefix if neither is available:
    ```
-   gtimeout 300 npx --yes afdocs@0.18.7 check "<docs_url>" --format json --score --max-links 50 --sampling deterministic > .litmus/run-<ts>/readability.json 2> .litmus/run-<ts>/readability.stderr.log
+   gtimeout 300 npx --yes afdocs@0.18.7 check "<docs_url>" --format json --score --max-links 50 --sampling deterministic > <cwd>/.litmus/run-<TS>/readability.json 2> <cwd>/.litmus/run-<TS>/readability.stderr.log
    ```
    Capture the exit code. Validate with:
    ```
-   jq -e '.scoring.overall' .litmus/run-<ts>/readability.json
+   jq -e '.scoring.overall' <cwd>/.litmus/run-<TS>/readability.json
    ```
    Map results per Decision Gates. Always continue to step 4.
 
@@ -120,7 +121,7 @@ Do NOT run when: the URL is missing/invalid, or clearly not a docs site.
 - `<run-dir>/tasks.json`
 - `<run-dir>/executions/task-NNN/{solution.ts, package.json, result.json, install.log, stdout.log, stderr.log}` (×10, no `node_modules/`)
 - `<run-dir>/evaluations.json`
-- `<run-dir>/readability.json` (AFDocs raw output; absent when `readability_unavailable` is set)
+- `<run-dir>/readability.json` (AFDocs raw output; may be absent, empty, or invalid when `readability_unavailable` is set — do not assume validity without the `jq` check)
 - `<run-dir>/readability.stderr.log` (AFDocs stderr; always written during measure step)
 - `<cwd>/litmus-report-<TS>.md` (one per run; never overwritten)
 - `<cwd>/.litmus/reports-index.md` (append-only history index across runs)
@@ -131,26 +132,26 @@ Do NOT run when: the URL is missing/invalid, or clearly not a docs site.
 Populated when AFDocs produces valid JSON output. Exactly one of `readability` or `readability_unavailable` is set after step 3 — never both, never neither.
 
 ```
-readability: {
-  tool: "afdocs",
-  afdocs_version: "0.18.7",
-  overall_score: <0-100>,                       // maps to .scoring.overall
-  overall_grade: <"A" | "B" | "C" | "D" | "F">, // maps to .scoring.grade (clamp "A+" → "A")
-  pages_tested: <integer>,                      // maps to .testedPages.length
-  categories: {
-    content-discoverability: <0-100>,  // .scoring.categoryScores.content-discoverability.score
-    markdown-availability: <0-100>,    // .scoring.categoryScores.markdown-availability.score
-    page-size: <0-100>,                // .scoring.categoryScores.page-size.score
-    content-structure: <0-100>,        // .scoring.categoryScores.content-structure.score
-    url-stability: <0-100>,            // .scoring.categoryScores.url-stability.score
-    observability: <0-100>,            // .scoring.categoryScores.observability.score
-    authentication: <0-100>            // .scoring.categoryScores.authentication.score
+"readability": {
+  "tool": "afdocs",
+  "afdocs_version": "0.18.7",
+  "overall_score": <0-100>,                       // maps to .scoring.overall
+  "overall_grade": <"A" | "B" | "C" | "D" | "F">, // maps to .scoring.grade (clamp "A+" → "A")
+  "pages_tested": <integer>,                      // maps to .testedPages.length
+  "categories": {
+    "content-discoverability": <0-100>,  // .scoring.categoryScores.content-discoverability.score
+    "markdown-availability": <0-100>,    // .scoring.categoryScores.markdown-availability.score
+    "page-size": <0-100>,                // .scoring.categoryScores.page-size.score
+    "content-structure": <0-100>,        // .scoring.categoryScores.content-structure.score
+    "url-stability": <0-100>,            // .scoring.categoryScores.url-stability.score
+    "observability": <0-100>,            // .scoring.categoryScores.observability.score
+    "authentication": <0-100>            // .scoring.categoryScores.authentication.score
   },
-  failed_checks: [                     // .results[] filtered where .status in {"fail", "warn"}
-    { id, category, status, message }
+  "failed_checks": [                     // .results[] filtered where .status in {"fail", "warn"}
+    { "id": <string>, "category": <string>, "status": <"fail" | "warn">, "message": <string> }
   ],
-  raw_path: "readability.json",
-  timestamp: <ISO 8601>
+  "raw_path": "readability.json",
+  "timestamp": <ISO 8601>
 }
 ```
 
@@ -159,20 +160,19 @@ readability: {
 Populated when AFDocs cannot run or produces unparseable output.
 
 ```
-readability_unavailable: {
-  reason: "afdocs_install_failed" | "afdocs_runtime_error" | "afdocs_invalid_output" | "node_version",
-  detail: <string>,
-  timestamp: <ISO 8601>
+"readability_unavailable": {
+  "reason": "afdocs_install_failed" | "afdocs_runtime_error" | "afdocs_invalid_output" | "node_version",
+  "detail": <string>,
+  "timestamp": <ISO 8601>
 }
 ```
 
 ### Overall Grade
 
-Computed on the A–F scale from the grade mapping below:
+Computed on the A–F scale from the grade mapping below. "Worse" uses the ordering `F < D < C < B < A` (A+ from AFDocs is clamped to A before comparison):
 
-- Both axes present: `min(readability_grade, execution_grade)`
-- One axis unavailable: the available grade with a parenthetical marker — e.g. `B (readability unavailable)` or `C (execution unavailable)`
-- Both axes unavailable: Overall = undefined
+- Both axes present: the worse of `readability_grade` and `execution_grade`.
+- Readability unavailable: the execution grade with a `(readability unavailable)` suffix — e.g. `B (readability unavailable)`. Execution failures HALT the pipeline before this step renders, so the inverse case is unreachable.
 
 ## Grade mapping
 
