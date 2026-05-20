@@ -52,7 +52,7 @@ Do NOT run when: the URL is missing/invalid, or clearly not a docs site.
 | AFDocs exits nonzero and `jq` fails to parse output | Set `manifest.readability_unavailable.reason = "afdocs_runtime_error"`; continue |
 | AFDocs exits 0 but `jq` fails to parse output | Set `manifest.readability_unavailable.reason = "afdocs_invalid_output"`; continue |
 | `readability_unavailable` is set (render step) | Show `—` in Readability column; Overall = execution_grade with `(readability unavailable)` marker |
-| Both `manifest.readability` and `manifest.readability_unavailable` are set, or neither is set, after step 3 | Halt; report invariant violation in `measure` step |
+| Both `manifest.readability` and `manifest.readability_unavailable` are set, or neither is set, after step 3 | Halt; report invariant violation |
 
 ## Execution Steps
 
@@ -121,7 +121,7 @@ Do NOT run when: the URL is missing/invalid, or clearly not a docs site.
 - `<run-dir>/tasks.json`
 - `<run-dir>/executions/task-NNN/{solution.ts, package.json, result.json, install.log, stdout.log, stderr.log}` (×10, no `node_modules/`)
 - `<run-dir>/evaluations.json`
-- `<run-dir>/readability.json` (AFDocs raw output; may be absent, empty, or invalid when `readability_unavailable` is set — do not assume validity without the `jq` check)
+- `<run-dir>/readability.json` (AFDocs raw output; may be absent, empty, or invalid when `readability_unavailable` is set)
 - `<run-dir>/readability.stderr.log` (AFDocs stderr; always written during measure step)
 - `<cwd>/litmus-report-<TS>.md` (one per run; never overwritten)
 - `<cwd>/.litmus/reports-index.md` (append-only history index across runs)
@@ -169,10 +169,10 @@ Populated when AFDocs cannot run or produces unparseable output.
 
 ### Overall Grade
 
-Computed on the A–F scale from the grade mapping below. "Worse" uses the ordering `F < D < C < B < A` (A+ from AFDocs is clamped to A before comparison):
+"Worse" uses the ordering `F < D < C < B < A`.
 
 - Both axes present: the worse of `readability_grade` and `execution_grade`.
-- Readability unavailable: the execution grade with a `(readability unavailable)` suffix — e.g. `B (readability unavailable)`. Execution failures HALT the pipeline before this step renders, so the inverse case is unreachable.
+- Readability unavailable: the execution grade with a `(readability unavailable)` suffix — e.g. `B (readability unavailable)`.
 
 ## Grade mapping
 
