@@ -11,7 +11,7 @@ Litmus Report — {{hostname}}
   Readability:  {{readability_score}}/100  (Grade {{readability_grade}})
 {{/if}}
 {{#if readability_partial}}
-  Readability:  partial ({{readability_partial.pages_tested}} page sampled)
+  Readability:  partial ({{readability_partial.pages_tested}} pages tested)
 {{/if}}
 {{#if readability_unavailable}}
   Readability:  unavailable ({{readability_unavailable.reason}})

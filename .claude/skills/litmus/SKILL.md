@@ -49,12 +49,12 @@ Do NOT run when: the URL is missing/invalid, or clearly not a docs site.
 | `.litmus/reports-index.md` does not exist | Create it from the template header, then append this run's row |
 | Node major < 22 (measure step) | Set `manifest.readability_unavailable.reason = "node_version"`; continue to ingest |
 | AFDocs install fails (npx exits nonzero, stderr matches `E404\|ENOTFOUND\|npm error`) | Set `manifest.readability_unavailable.reason = "afdocs_install_failed"`; continue |
-| AFDocs returns valid JSON, `.testedPages.length >= 3` | Populate `manifest.readability` |
-| AFDocs returns valid JSON, `.testedPages.length < 3` | Populate `manifest.readability_partial` with `reason: "low_sample_count"` |
+| AFDocs returns valid JSON, `.testedPages >= 3` | Populate `manifest.readability` |
+| AFDocs returns valid JSON, `.testedPages < 3` | Populate `manifest.readability_partial` with `reason: "low_sample_count"` |
 | AFDocs exits nonzero and `jq` fails to parse output | Set `manifest.readability_unavailable.reason = "afdocs_runtime_error"`; continue |
 | AFDocs exits 0 but `jq` fails to parse output | Set `manifest.readability_unavailable.reason = "afdocs_invalid_output"`; continue |
 | `readability_unavailable` is set (render step) | Show `—` in Readability column; Overall = execution_grade with `(readability unavailable)` marker |
-| `readability_partial` is set (render step) | Show `partial (<n> page sampled)` in Readability column; Overall = execution_grade with `(readability partial)` marker |
+| `readability_partial` is set (render step) | Show `partial (<n> pages tested)` in Readability column; Overall = execution_grade with `(readability partial)` marker |
 | Multiple of `manifest.readability`, `manifest.readability_partial`, `manifest.readability_unavailable` are set, or none is set, after step 3 | Halt; report invariant violation |
 
 ## Execution Steps
@@ -82,7 +82,7 @@ Do NOT run when: the URL is missing/invalid, or clearly not a docs site.
    ```
    jq -e '.scoring.overall' <cwd>/.litmus/run-<TS>/readability.json
    ```
-   Map results per Decision Gates. Always continue to step 4.
+   Read `.testedPages` (integer) from the same file to branch between `readability` and `readability_partial`. Map results per Decision Gates. Always continue to step 4.
 
 4. **Ingest.**
    1. Try `curl -fsSL <url>/llms.txt`. If 200 + non-HTML, parse links under sections titled `Documentation`/`Docs`/`Reference`/`Guides`. Exclude `Optional`/`GitHub`/`Repository`/`Demo`. Keep input-hostname URLs only.
@@ -141,7 +141,7 @@ Populated when AFDocs produces valid JSON and samples at least 3 pages. Exactly 
   "afdocs_version": "0.18.7",
   "overall_score": <0-100>,                       // maps to .scoring.overall
   "overall_grade": <"A" | "B" | "C" | "D" | "F">, // maps to .scoring.grade (clamp "A+" → "A")
-  "pages_tested": <integer>,                      // maps to .testedPages.length
+  "pages_tested": <integer>,                      // maps to .testedPages
   "categories": {
     "content-discoverability": <0-100>,  // .scoring.categoryScores.content-discoverability.score
     "markdown-availability": <0-100>,    // .scoring.categoryScores.markdown-availability.score

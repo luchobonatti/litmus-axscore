@@ -48,7 +48,7 @@
 - Reason: `{{readability_partial.reason}}`
 - Pages tested: {{readability_partial.pages_tested}}
 
-Raw output: `{{cwd}}/.litmus/run-{{ts}}/readability.json`
+**Raw output:** `{{cwd}}/.litmus/run-{{ts}}/readability.json`
 {{/if}}
 
 {{#if readability_unavailable}}
