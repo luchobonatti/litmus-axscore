@@ -4,7 +4,7 @@ description: "Trigger: run litmus on, litmus check, evaluate docs at, score doc 
 license: Apache-2.0
 metadata:
   author: bootnode
-  version: "1.0"
+  version: "1.1"
 ---
 
 # litmus
@@ -46,12 +46,41 @@ Do NOT run when: the URL is missing/invalid, or clearly not a docs site.
 | No portable timeout mechanism available | Set `enforced_timeout: false` in `result.json`; continue |
 | `<cwd>/litmus-report-<TS>.md` already exists (same `<TS>`) | Append `-N` suffix to the timestamp |
 | `.litmus/reports-index.md` does not exist | Create it from the template header, then append this run's row |
+| Node major < 22 (measure step) | Set `manifest.readability_unavailable.reason = "node_version"`; continue to ingest |
+| AFDocs install fails (npx exits nonzero, stderr matches `E404\|ENOTFOUND\|npm error`) | Set `manifest.readability_unavailable.reason = "afdocs_install_failed"`; continue |
+| AFDocs returns valid JSON (`jq -e '.summary.score'` succeeds, exit 0 or 1) | Populate `manifest.readability`; do NOT set `readability_unavailable` |
+| AFDocs exits nonzero and `jq` fails to parse output | Set `manifest.readability_unavailable.reason = "afdocs_runtime_error"`; continue |
+| AFDocs exits 0 but `jq` fails to parse output | Set `manifest.readability_unavailable.reason = "afdocs_invalid_output"`; continue |
+| `readability_unavailable` is set (render step) | Show `—` in Readability column; Overall = execution_grade with `(readability unavailable)` marker |
 
 ## Execution Steps
 
 1. **Validate input.** Reject non-HTTP(S) URLs or obviously non-doc URLs.
 2. **Initialize run dir.** Create `<cwd>/.litmus/run-<TS>/`. If `.git` is present, ensure `.gitignore` contains `.litmus/` and `litmus-report*.md` — append each only when not already an exact line (idempotent). Write `manifest.json` with `{input_url, ts, skill_version, conversion_method, interactive_flows_skipped: []}`.
-3. **Ingest.**
+3. **Measure readability.**
+   Get the Node.js major version:
+   ```
+   NODE_MAJOR_RAW="$(node --version)"
+   NODE_MAJOR="${NODE_MAJOR_RAW#v}"
+   NODE_MAJOR="${NODE_MAJOR%%.*}"
+   ```
+   If `NODE_MAJOR` is less than 22, write to `manifest.json`:
+   ```
+   manifest.readability_unavailable = { reason: "node_version", detail: "<actual node version>", timestamp: <ISO 8601> }
+   ```
+   Then skip to step 4.
+
+   Otherwise run:
+   ```
+   timeout 300 npx --yes afdocs@0.18.7 check "<docs_url>" --format json --score --max-links 50 --sampling deterministic > .litmus/run-<ts>/readability.json 2> .litmus/run-<ts>/readability.stderr.log
+   ```
+   Capture the exit code. Validate with:
+   ```
+   jq -e '.summary.score' .litmus/run-<ts>/readability.json
+   ```
+   Map results per Decision Gates. Always continue to step 4.
+
+4. **Ingest.**
    1. Try `curl -fsSL <url>/llms.txt`. If 200 + non-HTML, parse links under sections titled `Documentation`/`Docs`/`Reference`/`Guides`. Exclude `Optional`/`GitHub`/`Repository`/`Demo`. Keep input-hostname URLs only.
    2. Else try `curl -fsSL <url>/sitemap.xml`. Filter to URLs under the input URL's path prefix.
    3. Else BFS from input URL: same hostname, max depth 3.
@@ -65,14 +94,14 @@ Do NOT run when: the URL is missing/invalid, or clearly not a docs site.
       2. **Else fetch the HTML version** and convert via the deterministic local tool (turndown or pandoc per Hard Rules). Set `conversion_method` to the tool used (`turndown`, `pandoc`, etc.).
       3. Strip nav/footer/scripts when converting from HTML.
       4. Write `ingested/content/<slug>.md` and append to `ingested/pages.json` with `[{url, slug, title, headings, char_count, category}]`. Category labels follow `prompts/task-generation.md`.
-4. **Generate.** Apply [`prompts/task-generation.md`](prompts/task-generation.md) to `pages.json` and the ingested markdown. Produce exactly 10 TypeScript tasks, library-level only, diversified across pages and difficulty. Write `tasks.json`.
+5. **Generate.** Apply [`prompts/task-generation.md`](prompts/task-generation.md) to `pages.json` and the ingested markdown. Produce exactly 10 TypeScript tasks, library-level only, diversified across pages and difficulty. Write `tasks.json`.
    - If fewer than 10 library-level claims are found, **halt** and record in `manifest.json`:
      - `task_generation_shortfall: <count>` — the count of library-level claims found (0 to 9).
      - `halt_classification` — one of:
        - `scope_mismatch` when `pages_ingested >= 5 AND library_level_claims == 0`.
        - `low_quality` when `pages_ingested >= 5 AND 0 < library_level_claims < 10`.
        - `insufficient_content` when `pages_ingested < 5`.
-5. **Execute.** For each task, apply [`prompts/execution.md`](prompts/execution.md):
+6. **Execute.** For each task, apply [`prompts/execution.md`](prompts/execution.md):
    1. Create `executions/task-NNN/`.
    2. Write `solution.ts` and `package.json` (`{name, private: true, type: "module", dependencies}`). No `tsx` dep. No `tsconfig.json`.
    3. Run `npm install --prefer-offline --no-audit --no-fund --silent` (capture to `install.log`).
@@ -80,9 +109,9 @@ Do NOT run when: the URL is missing/invalid, or clearly not a docs site.
    5. Run with portable 60s timeout: `gtimeout 60 npx tsx solution.ts` (macOS), `timeout 60 npx tsx solution.ts` (Linux), or fall back per Decision Gate. Capture `end_ts = Date.now()` immediately after the process exits.
    6. Capture stdout, stderr, exit code, and `duration_ms` (= `end_ts - start_ts`) in `result.json`. Set `duration_ms_captured: true` in `manifest.json`.
    7. Delete `node_modules/`.
-6. **Evaluate.** Apply [`prompts/evaluation.md`](prompts/evaluation.md) to each `result.json`. Build `evaluations.json` per the schema defined there.
-7. **Report.** Compute Execution Score: `round(passed / total * 100)`. Render [`templates/scorecard.md`](templates/scorecard.md) inline in the chat. Render [`templates/full-report.md`](templates/full-report.md) to `<cwd>/litmus-report-<TS>.md` (timestamped, never overwrites prior runs). Append one row to `<cwd>/.litmus/reports-index.md` using [`templates/reports-index.md`](templates/reports-index.md) — create the file with its header if missing. Aggregate fix suggestions by `responsible_section`; prioritize sections by failure count.
-8. **Summarize.** Print one line: `Litmus complete. Execution Score: <N>/100 (<grade>). Full report: <cwd>/litmus-report-<TS>.md. History: <cwd>/.litmus/reports-index.md`.
+7. **Evaluate.** Apply [`prompts/evaluation.md`](prompts/evaluation.md) to each `result.json`. Build `evaluations.json` per the schema defined there.
+8. **Report.** Compute Execution Score: `round(passed / total * 100)`. Render [`templates/scorecard.md`](templates/scorecard.md) inline in the chat. Render [`templates/full-report.md`](templates/full-report.md) to `<cwd>/litmus-report-<TS>.md` (timestamped, never overwrites prior runs). Append one row to `<cwd>/.litmus/reports-index.md` using [`templates/reports-index.md`](templates/reports-index.md) — create the file with its header if missing. Aggregate fix suggestions by `responsible_section`; prioritize sections by failure count.
+9. **Summarize.** Print one line: `Litmus complete. Execution Score: <N>/100 (<grade>). Readability Score: <N>/100 (<grade>) [or: readability unavailable]. Full report: <cwd>/litmus-report-<TS>.md. History: <cwd>/.litmus/reports-index.md`.
 
 ## Output Contract
 
@@ -91,9 +120,56 @@ Do NOT run when: the URL is missing/invalid, or clearly not a docs site.
 - `<run-dir>/tasks.json`
 - `<run-dir>/executions/task-NNN/{solution.ts, package.json, result.json, install.log, stdout.log, stderr.log}` (×10, no `node_modules/`)
 - `<run-dir>/evaluations.json`
+- `<run-dir>/readability.json` (AFDocs raw output; absent when `readability_unavailable` is set)
+- `<run-dir>/readability.stderr.log` (AFDocs stderr; always written during measure step)
 - `<cwd>/litmus-report-<TS>.md` (one per run; never overwritten)
 - `<cwd>/.litmus/reports-index.md` (append-only history index across runs)
 - One-line summary in chat.
+
+### Manifest: `readability` block
+
+Populated when AFDocs produces valid JSON output. Exactly one of `readability` or `readability_unavailable` is set after step 3 — never both, never neither.
+
+```
+readability: {
+  tool: "afdocs",
+  version: "0.18.7",
+  overall_score: <0-100>,
+  grade: <"A" | "B" | "C" | "D" | "F">,
+  pages_tested: <integer>,
+  categories: {
+    content-discoverability: <0-100>,
+    markdown-availability: <0-100>,
+    page-size-truncation-risk: <0-100>,
+    content-structure: <0-100>,
+    url-stability: <0-100>,
+    observability: <0-100>,
+    authentication: <0-100>
+  },
+  raw_path: "readability.json",
+  timestamp: <ISO 8601>
+}
+```
+
+### Manifest: `readability_unavailable` block
+
+Populated when AFDocs cannot run or produces unparseable output.
+
+```
+readability_unavailable: {
+  reason: "afdocs_install_failed" | "afdocs_runtime_error" | "afdocs_invalid_output" | "node_version",
+  detail: <string>,
+  timestamp: <ISO 8601>
+}
+```
+
+### Overall Grade
+
+Computed on the A–F scale from the grade mapping below:
+
+- Both axes present: `min(readability_grade, execution_grade)`
+- One axis unavailable: the available grade with a parenthetical marker — e.g. `B (readability unavailable)` or `C (execution unavailable)`
+- Both axes unavailable: Overall = undefined
 
 ## Grade mapping
 
