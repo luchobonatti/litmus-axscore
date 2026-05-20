@@ -7,7 +7,14 @@
 ```
 Litmus Report — {{hostname}}
 
-  Execution Score:    {{score}}/100  (Grade {{grade}})
+{{#if readability}}
+  Readability:  {{readability_score}}/100  (Grade {{readability_grade}})
+{{/if}}
+{{#if readability_unavailable}}
+  Readability:  unavailable ({{readability_unavailable.reason}})
+{{/if}}
+  Execution:    {{score}}/100  (Grade {{grade}})
+  Overall:      Grade {{overall_grade}}
 
   Tasks executed:   {{total}}
   Passed:           {{passed}}
@@ -37,6 +44,9 @@ History:     {{cwd}}/.litmus/reports-index.md
 - `{{hostname}}` — `URL(manifest.input_url).hostname`.
 - `{{score}}` — `round(passed / total * 100)`.
 - `{{grade}}` — per the grade mapping in `SKILL.md`.
+- `{{readability_score}}` — `manifest.readability.overall_score`.
+- `{{readability_grade}}` — `manifest.readability.overall_grade`.
+- `{{overall_grade}}` — the worse of `readability_grade` and `execution_grade` on the ordering `F < D < C < B < A` when both are present; `<execution_grade> (readability unavailable)` when readability is unavailable.
 - `{{total}}`, `{{passed}}`, `{{failed}}`, `{{errored}}` — counts from `evaluations.json`.
 - `{{top_failure_types}}` — top 3 by frequency, descending. Source: `evaluations[].root_cause` (failures only). Omit the block if empty.
 - `{{top_problem_sections}}` — top 3 by failure frequency, descending. Source: `evaluations[].responsible_section` (failures only). Omit if empty.
