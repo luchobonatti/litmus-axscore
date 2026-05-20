@@ -9,7 +9,7 @@ Litmus Report — {{hostname}}
 
   Readability:  {{readability_score}}/100  (Grade {{readability_grade}})
   Execution:    {{score}}/100  (Grade {{grade}})
-  Overall:      **Grade {{overall_grade}}**
+  Overall:      Grade {{overall_grade}}
 
   Tasks executed:   {{total}}
   Passed:           {{passed}}
