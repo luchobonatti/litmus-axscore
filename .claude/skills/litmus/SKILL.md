@@ -115,7 +115,7 @@ Do NOT run when: the URL is missing/invalid, or clearly not a docs site.
    6. Capture stdout, stderr, exit code, and `duration_ms` (= `end_ts - start_ts`) in `result.json`. Set `duration_ms_captured: true` in `manifest.json`.
    7. Delete `node_modules/`.
 7. **Evaluate.** Apply [`prompts/evaluation.md`](prompts/evaluation.md) to each `result.json`. Build `evaluations.json` per the schema defined there.
-8. **Report.** Compute Execution Score: `round(passed / total * 100)`. Render [`templates/scorecard.md`](templates/scorecard.md) inline in the chat. Render [`templates/full-report.md`](templates/full-report.md) to `<cwd>/litmus-report-<TS>.md` (timestamped, never overwrites prior runs). Append one row to `<cwd>/.litmus/reports-index.md` using [`templates/reports-index.md`](templates/reports-index.md) — create the file with its header if missing. Aggregate fix suggestions by `responsible_section`; prioritize sections by failure count.
+8. **Report.** Compute Execution Score: `round(passed / total * 100)`. Render [`templates/scorecard.md`](templates/scorecard.md) inline in the chat. Render [`templates/full-report.md`](templates/full-report.md) to `<cwd>/litmus-report-<TS>.md` (timestamped, never overwrites prior runs). Render [`templates/full-report.html`](templates/full-report.html) to `<cwd>/litmus-report-<TS>.html` from the same manifest data (same `<TS>`, never overwrites prior runs). Append one row to `<cwd>/.litmus/reports-index.md` using [`templates/reports-index.md`](templates/reports-index.md) — create the file with its header if missing. Aggregate fix suggestions by `responsible_section`; prioritize sections by failure count.
 9. **Summarize.** Print one line: `Litmus complete. Execution Score: <N>/100 (<grade>). Readability Score: <N>/100 (<grade>) [or: readability unavailable]. Full report: <cwd>/litmus-report-<TS>.md. History: <cwd>/.litmus/reports-index.md`.
 
 ## Output Contract
@@ -128,6 +128,7 @@ Do NOT run when: the URL is missing/invalid, or clearly not a docs site.
 - `<run-dir>/readability.json` (AFDocs raw output; may be absent, empty, or invalid when `readability_unavailable` is set)
 - `<run-dir>/readability.stderr.log` (AFDocs stderr; always written during measure step)
 - `<cwd>/litmus-report-<TS>.md` (one per run; never overwritten)
+- `<cwd>/litmus-report-<TS>.html` (one per run; never overwritten; shareable HTML version of the same report)
 - `<cwd>/.litmus/reports-index.md` (append-only history index across runs)
 - One-line summary in chat.
 

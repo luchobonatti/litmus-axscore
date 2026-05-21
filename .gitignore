@@ -9,5 +9,6 @@ build/
 .vercel
 .atl/
 litmus-report*.md
+litmus-report*.html
 docs/validation/
 docs/branding/
