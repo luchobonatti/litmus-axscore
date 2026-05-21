@@ -1,0 +1,797 @@
+# Full Report HTML Template
+
+> Rendered to `<cwd>/litmus-report-<TS>.html` at the end of a Litmus run, alongside the markdown report.
+>
+> Placeholders use `{{double_braces}}`. The agent substitutes from `manifest.json`, `tasks.json`, and `evaluations.json` per the substitution rules at the foot of this file.
+
+<!-- BEGIN TEMPLATE CONTENT — everything between this marker and the matching END marker is written verbatim to the report file, with `{{placeholders}}` substituted per the rules below. -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Litmus · {{hostname}}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0e0f11;
+  --ink-2: #16171a;
+  --ink-3: #1c1d21;
+  --ink-4: #25262b;
+  --ink-5: #2f3035;
+  --rule-ghost: #1a1b1f;
+  --rule: #25262b;
+  --rule-firm: #3a3b40;
+  --paper-hi: #f5f1e4;
+  --paper: #ece8dc;
+  --paper-mid: #92897a;
+  --paper-dim: #5a5449;
+  --g-f: #d54a3a;
+  --g-d: #db7838;
+  --g-c: #c6a23e;
+  --g-b: #82b04a;
+  --g-a: #4ea86a;
+  --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body {
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.55;
+  min-height: 100vh;
+  padding: 3rem 2.5rem 5rem;
+}
+.page { max-width: 1080px; margin: 0 auto; }
+
+/* ─── Top bar ──────────────────────────────────────────────────── */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 3.5rem;
+}
+.lockup {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+.lockup-bar {
+  display: flex;
+  flex-direction: column;
+  width: 14px;
+  height: 36px;
+  overflow: hidden;
+}
+.lockup-bar span {
+  flex: 1;
+  display: block;
+}
+.lockup-bar span:nth-child(1) { background: var(--g-a); }
+.lockup-bar span:nth-child(2) { background: var(--g-b); }
+.lockup-bar span:nth-child(3) { background: var(--g-c); }
+.lockup-bar span:nth-child(4) { background: var(--g-d); }
+.lockup-bar span:nth-child(5) { background: var(--g-f); }
+.lockup-name {
+  font-family: var(--mono);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--paper-hi);
+  line-height: 1;
+}
+.topbar-meta {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--paper-mid);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.topbar-meta span { color: var(--paper-dim); }
+
+/* ─── Section eyebrow ──────────────────────────────────────────── */
+.section { margin-bottom: 4rem; }
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--paper-mid);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+}
+.eyebrow .sep { color: var(--paper-dim); margin: 0 0.5rem; }
+
+/* ─── Subject + metadata strip ─────────────────────────────────── */
+.subject {
+  font-family: var(--sans);
+  font-size: 2.5rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--paper-hi);
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+}
+.metastrip {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 1.25rem;
+  padding: 1rem 1.25rem;
+  background: var(--ink-2);
+  border: 1px solid var(--rule);
+  margin-bottom: 3rem;
+}
+.metastrip-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+.metastrip-label {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  color: var(--paper-dim);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.metastrip-value {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  color: var(--paper);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.metastrip-value.g-a { color: var(--g-a); }
+.metastrip-value.g-b { color: var(--g-b); }
+.metastrip-value.g-c { color: var(--g-c); }
+.metastrip-value.g-d { color: var(--g-d); }
+.metastrip-value.g-f { color: var(--g-f); }
+
+/* ─── Verdict ─────────────────────────────────────────────────── */
+.verdict {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 3rem;
+  align-items: start;
+  margin-bottom: 4rem;
+}
+.verdict-grade {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 7.5rem;
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+  padding: 0;
+}
+.verdict-grade.g-a { color: var(--g-a); }
+.verdict-grade.g-b { color: var(--g-b); }
+.verdict-grade.g-c { color: var(--g-c); }
+.verdict-grade.g-d { color: var(--g-d); }
+.verdict-grade.g-f { color: var(--g-f); }
+.verdict-body {
+  font-family: var(--sans);
+  font-style: italic;
+  font-size: 1.15rem;
+  line-height: 1.5;
+  color: var(--paper);
+  max-width: 60ch;
+}
+.verdict-body em { font-style: normal; color: var(--paper-hi); }
+.verdict-marker {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--paper-dim);
+  letter-spacing: 0.04em;
+  margin-top: 1rem;
+}
+
+/* ─── Two axes table ──────────────────────────────────────────── */
+.axes-block {
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  padding: 1.5rem 0;
+  margin-bottom: 4rem;
+}
+.axes-grid {
+  display: grid;
+  grid-template-columns: 120px 70px 1fr 50px;
+  gap: 1rem 1.5rem;
+  align-items: center;
+}
+.axes-grid > .ax-label {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--paper-mid);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.ax-score {
+  font-family: var(--mono);
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--paper-hi);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.ax-bar { padding: 0.25rem 0; }
+.ax-grade {
+  font-family: var(--mono);
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: right;
+}
+.ax-grade.g-a { color: var(--g-a); }
+.ax-grade.g-b { color: var(--g-b); }
+.ax-grade.g-c { color: var(--g-c); }
+.ax-grade.g-d { color: var(--g-d); }
+.ax-grade.g-f { color: var(--g-f); }
+.ax-detail {
+  grid-column: 2 / -1;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--paper-dim);
+  letter-spacing: 0.04em;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px dashed var(--rule-ghost);
+  margin-bottom: 0.75rem;
+}
+.ax-detail:last-child { border-bottom: 0; margin-bottom: 0; padding-bottom: 0; }
+.bar {
+  height: 8px;
+  background: var(--ink-2);
+  border: 1px solid var(--rule-ghost);
+  overflow: hidden;
+}
+.bar-fill { height: 100%; }
+.bar-fill.g-a { background: var(--g-a); }
+.bar-fill.g-b { background: var(--g-b); }
+.bar-fill.g-c { background: var(--g-c); }
+.bar-fill.g-d { background: var(--g-d); }
+.bar-fill.g-f { background: var(--g-f); }
+
+/* ─── Exhibits ────────────────────────────────────────────────── */
+.section-intro {
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  color: var(--paper-mid);
+  max-width: 64ch;
+  margin-bottom: 2rem;
+  line-height: 1.55;
+}
+.exhibit {
+  display: grid;
+  grid-template-columns: 50px 1fr;
+  gap: 1.5rem;
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--rule);
+}
+.exhibit:last-child { border-bottom: 1px solid var(--rule); }
+.exhibit-num {
+  font-family: var(--mono);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--paper-mid);
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  padding-top: 0.2rem;
+}
+.exhibit-body { min-width: 0; }
+.exhibit-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+.exhibit-title {
+  font-family: var(--sans);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--paper-hi);
+  letter-spacing: -0.005em;
+}
+.exhibit-tag {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 0.18rem 0.55rem;
+  border: 1px solid var(--rule-firm);
+  color: var(--paper-mid);
+}
+.exhibit-tag.fail, .exhibit-tag.failed, .exhibit-tag.critical, .exhibit-tag.blocking { color: var(--g-f); border-color: rgba(213, 74, 58, 0.45); }
+.exhibit-tag.warn, .exhibit-tag.warning { color: var(--g-c); border-color: rgba(198, 162, 62, 0.45); }
+.exhibit-meta {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--paper-dim);
+  letter-spacing: 0.04em;
+  margin-left: auto;
+}
+.exhibit-id {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--paper-mid);
+  font-weight: 500;
+}
+.exhibit-message {
+  font-family: var(--sans);
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--paper);
+  margin-bottom: 0.85rem;
+}
+.exhibit-resolution {
+  font-family: var(--sans);
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--paper-mid);
+  padding-left: 1.5rem;
+  position: relative;
+}
+.exhibit-resolution::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--paper-dim);
+  font-family: var(--mono);
+}
+.exhibit-subsection {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--paper-mid);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin: 2rem 0 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--rule-ghost);
+}
+
+/* ─── Instrument panel (categories) ───────────────────────────── */
+.cat-list { display: flex; flex-direction: column; }
+.cat-row {
+  display: grid;
+  grid-template-columns: 220px 1fr 48px 28px;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--rule-ghost);
+}
+.cat-row:last-child { border-bottom: 0; }
+.cat-name {
+  font-family: var(--sans);
+  font-size: 0.88rem;
+  color: var(--paper);
+  font-weight: 400;
+}
+.cat-bar { height: 5px; background: var(--ink-2); border: 1px solid var(--rule-ghost); overflow: hidden; }
+.cat-bar-fill { height: 100%; }
+.cat-bar-fill.g-a { background: var(--g-a); }
+.cat-bar-fill.g-b { background: var(--g-b); }
+.cat-bar-fill.g-c { background: var(--g-c); }
+.cat-bar-fill.g-d { background: var(--g-d); }
+.cat-bar-fill.g-f { background: var(--g-f); }
+.cat-score {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--paper-hi);
+  font-weight: 500;
+}
+.cat-grade {
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: right;
+}
+.cat-grade.g-a { color: var(--g-a); }
+.cat-grade.g-b { color: var(--g-b); }
+.cat-grade.g-c { color: var(--g-c); }
+.cat-grade.g-d { color: var(--g-d); }
+.cat-grade.g-f { color: var(--g-f); }
+
+/* ─── Execution log ───────────────────────────────────────────── */
+.tasklog { display: flex; flex-direction: column; }
+.task {
+  border-bottom: 1px solid var(--rule);
+}
+.task:first-child { border-top: 1px solid var(--rule); }
+.task summary {
+  display: grid;
+  grid-template-columns: 14px 50px 78px 1fr 70px;
+  gap: 1rem;
+  align-items: baseline;
+  padding: 0.85rem 0.5rem;
+  cursor: pointer;
+  list-style: none;
+}
+.task summary::-webkit-details-marker { display: none; }
+.task .caret {
+  font-family: var(--mono);
+  color: var(--paper-dim);
+  font-size: 0.7rem;
+  transition: transform 0.15s;
+}
+.task[open] .caret { transform: rotate(90deg); }
+.task .status {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+.task .status.passed { color: var(--g-a); }
+.task .status.failed { color: var(--g-f); }
+.task .status.errored { color: var(--g-d); }
+.task .tid {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--paper-mid);
+}
+.task .desc {
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  color: var(--paper);
+  line-height: 1.45;
+}
+.task .timing {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--paper-dim);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.task .body {
+  padding: 0.5rem 0.5rem 1.5rem 80px;
+  border-top: 1px solid var(--rule-ghost);
+}
+.task .body dl {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 0.65rem 1.5rem;
+  margin-top: 0.5rem;
+}
+.task .body dt {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  color: var(--paper-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  padding-top: 0.2rem;
+}
+.task .body dd {
+  font-family: var(--sans);
+  font-size: 0.92rem;
+  color: var(--paper);
+  line-height: 1.5;
+}
+.task .body code {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  background: var(--ink-2);
+  padding: 0.1rem 0.4rem;
+  border: 1px solid var(--rule);
+  color: var(--paper);
+}
+.task .body pre {
+  margin-top: 0.4rem;
+  padding: 0.85rem 1rem;
+  background: var(--ink-2);
+  border: 1px solid var(--rule);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--paper-mid);
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+.tasklog-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px dashed var(--rule-ghost);
+}
+.tasklog-counts {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--paper-mid);
+  letter-spacing: 0.06em;
+}
+.tasklog-counts span.passed { color: var(--g-a); }
+.tasklog-counts span.failed { color: var(--g-f); }
+.tasklog-counts span.errored { color: var(--g-d); }
+
+/* ─── Colophon ─────────────────────────────────────────────────── */
+.colophon {
+  margin-top: 5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--paper-dim);
+  letter-spacing: 0.06em;
+}
+.colophon a {
+  color: var(--paper-mid);
+  text-decoration: none;
+  border-bottom: 1px solid var(--rule-firm);
+  padding-bottom: 1px;
+}
+.colophon a:hover { color: var(--paper-hi); border-bottom-color: var(--paper-mid); }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="topbar">
+  <div class="lockup">
+    <div class="lockup-bar" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+    <span class="lockup-name">LITMUS</span>
+  </div>
+  <div class="topbar-meta">{{date_human}} <span>·</span> v{{skill_version}}</div>
+</header>
+
+<section class="section">
+  <div class="eyebrow">01 <span class="sep">·</span> SUBJECT <span class="sep">·</span> AGENT-READINESS AUDIT</div>
+  <h1 class="subject">{{input_url}}</h1>
+  <div class="metastrip">
+    <div class="metastrip-cell">
+      <div class="metastrip-label">Examined</div>
+      <div class="metastrip-value">{{date_compact}}</div>
+    </div>
+    <div class="metastrip-cell">
+      <div class="metastrip-label">Composite</div>
+      <div class="metastrip-value g-{{overall_grade_lower}}">{{overall_grade}}</div>
+    </div>
+    <div class="metastrip-cell">
+      <div class="metastrip-label">Readability</div>
+      <div class="metastrip-value">{{readability_summary}}</div>
+    </div>
+    <div class="metastrip-cell">
+      <div class="metastrip-label">Execution</div>
+      <div class="metastrip-value g-{{grade_lower}}">{{grade}} · {{score}}</div>
+    </div>
+    <div class="metastrip-cell">
+      <div class="metastrip-label">Exhibits</div>
+      <div class="metastrip-value">{{findings_count}}</div>
+    </div>
+    <div class="metastrip-cell">
+      <div class="metastrip-label">Tasks</div>
+      <div class="metastrip-value">{{passed}} / {{total}}</div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="eyebrow">02 <span class="sep">·</span> VERDICT</div>
+  <div class="verdict">
+    <div class="verdict-grade g-{{overall_grade_lower}}">{{overall_grade}}</div>
+    <div>
+      <div class="verdict-body">{{axes_summary}}</div>
+      {{#if overall_marker}}<div class="verdict-marker">{{overall_marker}}</div>{{/if}}
+    </div>
+  </div>
+  <div class="axes-block">
+    <div class="axes-grid">
+      {{#if readability}}
+      <div class="ax-label">Readability</div>
+      <div class="ax-score">{{readability.overall_score}}</div>
+      <div class="ax-bar"><div class="bar"><div class="bar-fill g-{{readability.overall_grade_lower}}" style="width: {{readability.overall_score}}%"></div></div></div>
+      <div class="ax-grade g-{{readability.overall_grade_lower}}">{{readability.overall_grade}}</div>
+      <div class="ax-detail">{{readability.pages_tested}} pages sampled · afdocs {{readability.afdocs_version}}</div>
+      {{/if}}
+      {{#if readability_partial}}
+      <div class="ax-label">Readability</div>
+      <div class="ax-score">—</div>
+      <div class="ax-bar"></div>
+      <div class="ax-grade">—</div>
+      <div class="ax-detail">partial · {{readability_partial.pages_tested}} pages tested</div>
+      {{/if}}
+      {{#if readability_unavailable}}
+      <div class="ax-label">Readability</div>
+      <div class="ax-score">—</div>
+      <div class="ax-bar"></div>
+      <div class="ax-grade">—</div>
+      <div class="ax-detail">unavailable · {{readability_unavailable.reason}}</div>
+      {{/if}}
+
+      <div class="ax-label">Execution</div>
+      <div class="ax-score">{{score}}</div>
+      <div class="ax-bar"><div class="bar"><div class="bar-fill g-{{grade_lower}}" style="width: {{score}}%"></div></div></div>
+      <div class="ax-grade g-{{grade_lower}}">{{grade}}</div>
+      <div class="ax-detail">{{passed}} passed · {{failed}} failed · {{errored}} errored</div>
+    </div>
+  </div>
+</section>
+
+{{#if has_findings}}
+<section class="section">
+  <div class="eyebrow">03 <span class="sep">·</span> EXHIBITS <span class="sep">·</span> {{findings_count}} ITEM{{findings_count_caps_s}}</div>
+  <p class="section-intro">Actionable changes to apply to the documentation. Each exhibit is sourced from either AFDocs (readability axis) or Litmus (execution axis), grouped below by the kind of evidence behind it.</p>
+
+  {{#if readability.diagnostics.length}}
+  <div class="exhibit-subsection">Readability <span style="color: var(--paper-dim)">·</span> system-level</div>
+  {{#each readability.diagnostics}}
+  <div class="exhibit">
+    <div class="exhibit-num">{{exhibit_num}}</div>
+    <div class="exhibit-body">
+      <div class="exhibit-head">
+        <span class="exhibit-tag {{severity}}">{{severity}}</span>
+        <span class="exhibit-id">{{id}}</span>
+      </div>
+      <div class="exhibit-message">{{message}}</div>
+      <div class="exhibit-resolution">{{resolution}}</div>
+    </div>
+  </div>
+  {{/each}}
+  {{/if}}
+
+  {{#if readability.failed_checks.length}}
+  <div class="exhibit-subsection">Readability <span style="color: var(--paper-dim)">·</span> per-check</div>
+  {{#each readability.failed_checks}}
+  <div class="exhibit">
+    <div class="exhibit-num">{{exhibit_num}}</div>
+    <div class="exhibit-body">
+      <div class="exhibit-head">
+        <span class="exhibit-tag {{status}}">{{status}}</span>
+        <span class="exhibit-id">{{id}}</span>
+        <span class="exhibit-meta">{{category}}</span>
+      </div>
+      <div class="exhibit-message">{{message}}</div>
+      {{#if resolution}}<div class="exhibit-resolution">{{resolution}}</div>{{/if}}
+    </div>
+  </div>
+  {{/each}}
+  {{/if}}
+
+  {{#if execution_findings.length}}
+  <div class="exhibit-subsection">Execution <span style="color: var(--paper-dim)">·</span> per-task</div>
+  {{#each execution_findings}}
+  <div class="exhibit">
+    <div class="exhibit-num">{{exhibit_num}}</div>
+    <div class="exhibit-body">
+      <div class="exhibit-head">
+        <span class="exhibit-tag failed">failed</span>
+        <span class="exhibit-id">{{task_id}}</span>
+        <span class="exhibit-meta">{{root_cause}} · {{responsible_section}}</span>
+      </div>
+      <div class="exhibit-message">{{description}}</div>
+      <div class="exhibit-resolution">{{fix_suggestion}}</div>
+    </div>
+  </div>
+  {{/each}}
+  {{/if}}
+</section>
+{{/if}}
+
+{{#if no_findings}}
+<section class="section">
+  <div class="eyebrow">03 <span class="sep">·</span> EXHIBITS <span class="sep">·</span> NONE</div>
+  <p class="section-intro">No actionable changes detected. Readability and Execution both passed cleanly.</p>
+</section>
+{{/if}}
+
+{{#if readability}}
+<section class="section">
+  <div class="eyebrow">04 <span class="sep">·</span> INSTRUMENT PANEL <span class="sep">·</span> READABILITY</div>
+  <div class="cat-list">
+    {{#each readability_categories}}
+    <div class="cat-row">
+      <span class="cat-name">{{label}}</span>
+      <div class="cat-bar"><div class="cat-bar-fill g-{{grade_band}}" style="width: {{score}}%"></div></div>
+      <span class="cat-score">{{score}}</span>
+      <span class="cat-grade g-{{grade_band}}">{{grade_letter}}</span>
+    </div>
+    {{/each}}
+  </div>
+</section>
+{{/if}}
+
+<section class="section">
+  <div class="eyebrow">05 <span class="sep">·</span> EXECUTION LOG <span class="sep">·</span> {{task_count}} TASKS</div>
+  <div class="tasklog-header">
+    <p class="section-intro" style="margin-bottom: 0;">The TypeScript tasks Litmus generated and ran against the documentation. Each tests a single library-level claim.</p>
+    <div class="tasklog-counts">
+      <span class="passed">{{passed}} passed</span>
+      <span style="color: var(--paper-dim); margin: 0 0.5rem;">·</span>
+      <span class="failed">{{failed}} failed</span>
+      <span style="color: var(--paper-dim); margin: 0 0.5rem;">·</span>
+      <span class="errored">{{errored}} errored</span>
+    </div>
+  </div>
+  <div class="tasklog">
+    {{#each tasks_with_evaluations}}
+    <details class="task">
+      <summary>
+        <span class="caret">▸</span>
+        <span class="status {{status}}">{{status}}</span>
+        <span class="tid">{{id}}</span>
+        <span class="desc">{{description}}</span>
+        <span class="timing">{{duration_ms}}ms</span>
+      </summary>
+      <div class="body">
+        <dl>
+          <dt>Success criterion</dt><dd>{{success_criterion}}</dd>
+          <dt>Outcome</dt><dd>exit code <code>{{exit_code}}</code></dd>
+          {{#if stdout_excerpt}}<dt>Stdout</dt><dd><pre>{{stdout_excerpt}}</pre></dd>{{/if}}
+          {{#if failed}}
+          <dt>Root cause</dt><dd><code>{{root_cause}}</code></dd>
+          <dt>Section</dt><dd><code>{{responsible_section}}</code></dd>
+          <dt>Fix</dt><dd>{{fix_suggestion}}</dd>
+          {{/if}}
+          {{#if errored}}
+          <dt>Error phase</dt><dd>{{error_phase}}</dd>
+          <dt>Error message</dt><dd><code>{{error_message}}</code></dd>
+          {{/if}}
+        </dl>
+      </div>
+    </details>
+    {{/each}}
+  </div>
+</section>
+
+<footer class="colophon">
+  <div>Litmus v{{skill_version}} <span style="color: var(--paper-dim)">·</span> HTML→md via {{conversion_method}}</div>
+  <div>Powered by <a href="https://bootnode.dev">BootNode</a></div>
+</footer>
+
+</div>
+</body>
+</html>
+
+<!-- END TEMPLATE CONTENT. The sections below are meta-documentation for the renderer; they do NOT appear in the rendered report. -->
+
+## Substitution rules
+
+Hyphens in path segments (e.g. `categories.content-discoverability`) are literal key characters, not subtraction operators. All field references that exist in `templates/full-report.md` resolve the same way here.
+
+- `{{ts}}`, `{{hostname}}`, `{{input_url}}`, `{{skill_version}}`, `{{conversion_method}}` — from `manifest.json`.
+- `{{date_human}}` — long human-readable date and time derived from `manifest.ts` (e.g. `May 20, 2026 · 13:33 UTC`).
+- `{{date_compact}}` — short ISO date derived from `manifest.ts` (e.g. `2026-05-20 · 13:33 UTC`).
+- `{{readability}}`, `{{readability_partial}}`, `{{readability_unavailable}}` — truthy when the corresponding manifest block is populated.
+- `{{readability.overall_grade_lower}}` — `manifest.readability.overall_grade` lowercased (used as CSS class suffix `g-a`...`g-f`).
+- `{{readability_summary}}` — short string for the metastrip: `<grade> <score>/100` when readability is present, `partial` / `unavailable` otherwise.
+- `{{readability.diagnostics}}`, `{{readability.failed_checks}}` — arrays as documented in `SKILL.md`. Each entry passed to `{{#each}}` is augmented with `exhibit_num` (zero-padded sequential number across the entire Exhibits section, e.g. `01`, `02`, …).
+- `{{readability_categories}}` — derived array, 7 entries, each with `key`, `label` (humanized), `score`, `grade_band` (lowercased `a`...`f`), `grade_letter` (uppercased).
+- `{{score}}`, `{{grade}}`, `{{grade_lower}}`, `{{passed}}`, `{{failed}}`, `{{errored}}`, `{{total}}` — computed from `evaluations.json`.
+- `{{overall_grade}}`, `{{overall_grade_lower}}`, `{{overall_marker}}` — combined per `SKILL.md` rules.
+- `{{axes_summary}}` — editorial sentence summarizing the verdict, may include `<em>...</em>` emphasis spans around key noun phrases.
+- `{{has_findings}}` / `{{no_findings}}` / `{{findings_count}}` / `{{findings_count_caps_s}}` — drive the Exhibits section. `findings_count_caps_s` is `S` (uppercase) when plural, empty string when 1, matching the eyebrow's all-caps styling.
+- `{{execution_findings}}` — flat array derived from failed `evaluations[]` joined with task description, augmented with `exhibit_num`.
+- `{{tasks_with_evaluations}}` — `tasks.json` joined with `evaluations.json`. Order: by `id` asc.
+- `{{task_count}}` — `tasks.json.length`.
+- `{{stdout_excerpt}}` — first 500 chars of stdout, truncated with `…` if longer.
+
+## Edge cases
+
+- **No findings at all.** Render the `{{#if no_findings}}` block instead of the per-sub-block iteration.
+- **Both `readability` and `readability_partial`/`readability_unavailable` populated.** Per `SKILL.md` Decision Gates the run halts before rendering. If reached, render the populated state and skip the others.
+- **HTML escaping.** Treat all `{{...}}` substitutions as plain text. `fix_suggestion`, `message`, `resolution`, `description`, and `stdout_excerpt` may contain `<`, `>`, `&` — escape to `&lt;`, `&gt;`, `&amp;` when substituting into HTML body content.
+- **Brand mark.** The five `<span>` elements inside `.lockup-bar` render the segmented gradient strip; they are part of the template and rendered verbatim with no substitution inside.
+- **External fonts.** The template loads Inter and JetBrains Mono from Google Fonts via `<link rel="stylesheet">`. Falls back to system fonts when offline. For fully offline-safe rendering, a future revision may inline the fonts as base64.
+
+## Length budget
+
+Target ≤ 10000 lines for a 10-task run. If the rendered report exceeds this, the renderer truncates per-task `stdout_excerpt` further (down to 200 chars) and flags the truncation in the task-body.

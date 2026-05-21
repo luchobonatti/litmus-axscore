@@ -15,18 +15,18 @@ Run when the user asks to evaluate, score, or audit a documentation site for AI 
 
 **Input:** one HTTP(S) URL pointing to a **documentation site or section** (e.g. `docs.example.com`, `example.com/docs`). NOT a marketing landing, repo, demo, or aggregator.
 
-**Output:** inline scorecard, `<cwd>/litmus-report-<TS>.md` (timestamped, one per run), an append-only `.litmus/reports-index.md`, and structured artifacts under `<cwd>/.litmus/run-<TS>/`.
+**Output:** inline scorecard, `<cwd>/litmus-report-<TS>.md` and `<cwd>/litmus-report-<TS>.html` (timestamped, one per run), an append-only `.litmus/reports-index.md`, and structured artifacts under `<cwd>/.litmus/run-<TS>/`.
 
 Do NOT run when: the URL is missing/invalid, or clearly not a docs site.
 
 ## Hard Rules
 
-- Write only under `<cwd>/.litmus/`, `<cwd>/litmus-report-<TS>.md`, and `<cwd>/.gitignore` (per the rule below). Never write elsewhere. Never overwrite a prior report.
+- Write only under `<cwd>/.litmus/`, `<cwd>/litmus-report-<TS>.md`, `<cwd>/litmus-report-<TS>.html`, and `<cwd>/.gitignore` (per the rule below). Never write elsewhere. Never overwrite a prior report.
 - Never read `.env`, credentials, or env vars beyond what `npm install` needs.
 - All fetches via `curl -fsSL` (Bash) or `fetch()` (Node). NEVER use model-mediated fetch (e.g. WebFetch) for existence checks, raw content, OR conversion.
 - HTML→markdown via a deterministic local tool: `turndown` (via `node -e` or `npx -y turndown-cli`) or `pandoc`. Record the tool in `manifest.json` under `conversion_method`.
 - Each step produces a structured artifact. Later steps MUST only read prior artifacts — never recompute.
-- Add `.litmus/` and `litmus-report*.md` to `.gitignore` if a `.git` directory is present. Append each entry only when it is not already an exact line in `.gitignore`.
+- Add `.litmus/`, `litmus-report*.md`, and `litmus-report*.html` to `.gitignore` if a `.git` directory is present. Append each entry only when it is not already an exact line in `.gitignore`.
 - `<TS>` is ISO-8601 UTC compact: `YYYYMMDDTHHMMSSZ` (e.g. `20260518T145200Z`).
 - All paths passed to Bash MUST be absolute. `cwd` is not reliable between calls.
 - Tasks must be runnable in isolation: no `@/src/...` imports, no scaffold-dependent paths. Test library-level claims only.
@@ -82,7 +82,7 @@ Do NOT run when: the URL is missing/invalid, or clearly not a docs site.
    ```
    jq -e '.scoring.overall' <cwd>/.litmus/run-<TS>/readability.json
    ```
-   Read `.testedPages` (integer) from the same file to branch between `readability` and `readability_partial`. Map results per Decision Gates. Always continue to step 4.
+   Read `.testedPages` (integer) from the same file to branch between `readability` and `readability_partial`. When populating `manifest.readability`, extract `.scoring.diagnostics` as-is into `readability.diagnostics` and join `.scoring.resolutions[check_id]` into each `failed_checks` entry as a `resolution` field (null if no resolution exists for that check). Map results per Decision Gates. Always continue to step 4.
 
 4. **Ingest.**
    1. Try `curl -fsSL <url>/llms.txt`. If 200 + non-HTML, parse links under sections titled `Documentation`/`Docs`/`Reference`/`Guides`. Exclude `Optional`/`GitHub`/`Repository`/`Demo`. Keep input-hostname URLs only. Consider this strategy successful if it yields ≥ 3 candidates.
@@ -115,7 +115,7 @@ Do NOT run when: the URL is missing/invalid, or clearly not a docs site.
    6. Capture stdout, stderr, exit code, and `duration_ms` (= `end_ts - start_ts`) in `result.json`. Set `duration_ms_captured: true` in `manifest.json`.
    7. Delete `node_modules/`.
 7. **Evaluate.** Apply [`prompts/evaluation.md`](prompts/evaluation.md) to each `result.json`. Build `evaluations.json` per the schema defined there.
-8. **Report.** Compute Execution Score: `round(passed / total * 100)`. Render [`templates/scorecard.md`](templates/scorecard.md) inline in the chat. Render [`templates/full-report.md`](templates/full-report.md) to `<cwd>/litmus-report-<TS>.md` (timestamped, never overwrites prior runs). Append one row to `<cwd>/.litmus/reports-index.md` using [`templates/reports-index.md`](templates/reports-index.md) — create the file with its header if missing. Aggregate fix suggestions by `responsible_section`; prioritize sections by failure count.
+8. **Report.** Compute Execution Score: `round(passed / total * 100)`. Render [`templates/scorecard.md`](templates/scorecard.md) inline in the chat. Render [`templates/full-report.md`](templates/full-report.md) to `<cwd>/litmus-report-<TS>.md` (timestamped, never overwrites prior runs). Render [`templates/full-report.html`](templates/full-report.html) to `<cwd>/litmus-report-<TS>.html` (same `<TS>`, never overwrites prior runs). Append one row to `<cwd>/.litmus/reports-index.md` using [`templates/reports-index.md`](templates/reports-index.md) — create the file with its header if missing. Aggregate fix suggestions by `responsible_section`; prioritize sections by failure count.
 9. **Summarize.** Print one line: `Litmus complete. Execution Score: <N>/100 (<grade>). Readability Score: <N>/100 (<grade>) [or: readability unavailable]. Full report: <cwd>/litmus-report-<TS>.md. History: <cwd>/.litmus/reports-index.md`.
 
 ## Output Contract
@@ -128,6 +128,7 @@ Do NOT run when: the URL is missing/invalid, or clearly not a docs site.
 - `<run-dir>/readability.json` (AFDocs raw output; may be absent, empty, or invalid when `readability_unavailable` is set)
 - `<run-dir>/readability.stderr.log` (AFDocs stderr; always written during measure step)
 - `<cwd>/litmus-report-<TS>.md` (one per run; never overwritten)
+- `<cwd>/litmus-report-<TS>.html` (one per run; never overwritten)
 - `<cwd>/.litmus/reports-index.md` (append-only history index across runs)
 - One-line summary in chat.
 
@@ -152,7 +153,10 @@ Populated when AFDocs produces valid JSON and samples at least 3 pages. Exactly 
     "authentication": <0-100>            // .scoring.categoryScores.authentication.score
   },
   "failed_checks": [                     // .results[] filtered where .status in {"fail", "warn"}
-    { "id": <string>, "category": <string>, "status": <"fail" | "warn">, "message": <string> }
+    { "id": <string>, "category": <string>, "status": <"fail" | "warn">, "message": <string>, "resolution": <string | null> }
+  ],
+  "diagnostics": [                       // .scoring.diagnostics[] as-is
+    { "id": <string>, "severity": <"warning" | "critical">, "message": <string>, "resolution": <string> }
   ],
   "raw_path": "readability.json",
   "timestamp": <ISO 8601>
