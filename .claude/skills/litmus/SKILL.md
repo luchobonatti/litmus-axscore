@@ -82,7 +82,7 @@ Do NOT run when: the URL is missing/invalid, or clearly not a docs site.
    ```
    jq -e '.scoring.overall' <cwd>/.litmus/run-<TS>/readability.json
    ```
-   Read `.testedPages` (integer) from the same file to branch between `readability` and `readability_partial`. Map results per Decision Gates. Always continue to step 4.
+   Read `.testedPages` (integer) from the same file to branch between `readability` and `readability_partial`. When populating `manifest.readability`, extract `.scoring.diagnostics` as-is into `readability.diagnostics` and join `.scoring.resolutions[check_id]` into each `failed_checks` entry as a `resolution` field (null if no resolution exists for that check). Map results per Decision Gates. Always continue to step 4.
 
 4. **Ingest.**
    1. Try `curl -fsSL <url>/llms.txt`. If 200 + non-HTML, parse links under sections titled `Documentation`/`Docs`/`Reference`/`Guides`. Exclude `Optional`/`GitHub`/`Repository`/`Demo`. Keep input-hostname URLs only. Consider this strategy successful if it yields ≥ 3 candidates.
@@ -152,7 +152,10 @@ Populated when AFDocs produces valid JSON and samples at least 3 pages. Exactly 
     "authentication": <0-100>            // .scoring.categoryScores.authentication.score
   },
   "failed_checks": [                     // .results[] filtered where .status in {"fail", "warn"}
-    { "id": <string>, "category": <string>, "status": <"fail" | "warn">, "message": <string> }
+    { "id": <string>, "category": <string>, "status": <"fail" | "warn">, "message": <string>, "resolution": <string | null> }
+  ],
+  "diagnostics": [                       // .scoring.diagnostics[] as-is
+    { "id": <string>, "severity": <"warning" | "critical">, "message": <string>, "resolution": <string> }
   ],
   "raw_path": "readability.json",
   "timestamp": <ISO 8601>
